@@ -1,0 +1,12 @@
+# - Config file for the ComputedTree lib
+# It defines the following variables
+#
+# ComputedTree_INCLUDE_DIRS - include directories
+# ComputedTree_LIBRARY_DIRS - library directory (normally not used!)
+# ComputedTree_LIBRARIES - libraries to link against
+
+# Tell the user project where to find our headers and libraries
+
+SET(ComputedTree_INCLUDE_DIRS @ComputedTree_INCLUDE_DIRS@)
+
+SET(ComputedTree_FLAGS @ComputedTree_FLAGS@ )
