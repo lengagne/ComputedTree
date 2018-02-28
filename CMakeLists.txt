@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 2.8 )
 project (ComputedTree)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x -msse2 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-template-friend -std=c++0x -msse2 -fPIC")
 
 
 ## TCMALLOC used to optimized memory allocation
@@ -49,20 +49,29 @@ add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
 
 set (INSTALL_LIB_PATH lib )
 
-FILE ( GLOB_RECURSE ComputedTree_HEADERS include/*.h   include/*.hxx )
+file( GLOB_RECURSE ComputedTree_SOURCES src/*.cpp )
+FILE( GLOB_RECURSE ComputedTree_HEADERS include/*.h   include/*.hxx )
 
 include_directories(	include
 			${TCMALLOC_INCLUDE_DIRS}
 			)
-			
+
 link_directories(	${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE}
-			${TCMALLOC_LIBRARY_DIRS})			
+                    ${TCMALLOC_LIBRARY_DIRS})
 
+add_library(ComputedTree SHARED ${ComputedTree_SOURCES})
 
+target_link_libraries(	ComputedTree
+                        ${TCMALLOC_LIBRARIES}
+                        )
 
 add_executable (TestTree apps/test_tree.cpp)
 
-                        
+target_link_libraries(	TestTree
+ 						ComputedTree
+						)
+
+
 ### installation of the files
 SET(INSTALL_INCLUDE_DIRS ${CMAKE_INSTALL_INCLUDEDIR}/include/ComputedTree)
 
