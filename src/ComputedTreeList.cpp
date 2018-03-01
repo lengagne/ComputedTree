@@ -1,6 +1,7 @@
 #include "ComputedTreeList.h"
 #include <iostream>
 #include <fstream>
+#include <dlfcn.h>
 
 ComputedTreeList::~ComputedTreeList()
 {
@@ -10,7 +11,6 @@ ComputedTreeList::~ComputedTreeList()
 
 Monomial* ComputedTreeList::add_input(ComputedTree* in)
 {
-//    std::cout<<"ComputedTreeListadd_input " << *in <<std::endl;
     // if does not already exist
     std::list<ComputedTree* >::iterator it = std::find(inputs_.begin(), inputs_.end(), in);
     if(it == inputs_.end())
@@ -69,7 +69,6 @@ ComputedTree ComputedTreeList::add_non_linear_input(  ComputedTree*in,
     in->nonlinear_sons_[nl] = t;
     nl->nonlinear_dad_ = std::pair<ComputedTree*, NLType >(in,t);
     nonlinear_inputs_.push_back(nl);
-    std::cout<<"add_non_linear "<<*nl<<std::endl;
     return *nl;
 }
 
@@ -95,18 +94,44 @@ void ComputedTreeList::add_output(  const ComputedTree& in,
     output_index_.push_back(index);
 }
 
+AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & libname)
+{
+    std::string lib;
+    if (libname =="")
+        lib = "lib"+class_name_ +".so";
+    else
+        lib = libname;
+
+
+    void* library =dlopen(lib.c_str(), RTLD_LAZY);
+    if (!library) {
+        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
+        exit(0);
+    }
+    // load the symbols
+    creator_ = (create_code*) dlsym(library, "create");
+    destructor_ = (destroy_code*) dlsym(library, "destroy");
+    if (!creator_ || !destructor_)
+    {
+        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
+        exit(0);
+    }
+
+    return creator_();
+}
+
+
 void ComputedTreeList::prepare_file( const std::string & filename)
 {
-    std::cout<<"ComputedTreeList::prepare_file "<< filename<<std::endl;
     unsigned int nb_in = inputs_.size();
 
     // create the file
     std::ofstream f (filename );
 
-    std::string class_name  = filename;
-    class_name.erase(class_name.find_last_of("."), std::string::npos);
-    f<<"#include <vector>\n#include <math.h>\n\n";
-    f<<"class "<<class_name<<"\n{\npublic:\n";
+    class_name_  = filename;
+    class_name_.erase(class_name_.find_last_of("."), std::string::npos);
+    f<<"#include <vector>\n#include <math.h>\n#include <iostream>\n#include \"AbstractGeneratedCode.h\" \n\n\n";
+    f<<"class "<<class_name_<<": public AbstractGeneratedCode\n{\npublic:\n";
 
     f<<"\tunsigned int get_nb_in()const \n\t{\treturn "<< nb_in <<";}\n\n";
     f<<"\t // temporary variables\n";
@@ -117,7 +142,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     unsigned int cpt = 0;
 
-    f<<"\n\n\tlong double set_input(std::vector<long double> & in)\n\t{\n";
+    f<<"\n\n\tvoid set_input(std::vector<long double> & in)\n\t{\n";
     for (std::list<ComputedTree*>::const_iterator it=inputs_.begin(); it!=inputs_.end(); it++)
     {
         const ComputedTree& tree = *(*it);
@@ -134,7 +159,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     }
     f<<"\t}\n\n";
 
-    f<<"\tlong double function(unsigned int out, unsigned int index)\n\t{\n\t\tswitch(out)\n\t\t{\n";
+    f<<"\tlong double function(unsigned int index, unsigned int out=0)\n\t{\n\t\tswitch(out)\n\t\t{\n";
 
     // find max output
     unsigned int nb_output = 0; // std::max_element(output_num_.begin(), output_num_.end()) + 1;
@@ -145,7 +170,6 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     nb_output ++;
     for (unsigned int i=0;i<nb_output;i++)
     {
-//        std::cout<<"preparing outputs number "<< i<<std::endl;
         // find the maximal index for this output
         unsigned int max_index = 0;
         bool one_find = false;  // allows to know if one index is found for the output
@@ -164,7 +188,6 @@ void ComputedTreeList::prepare_file( const std::string & filename)
         if(one_find)
         {
             f<<"\t\t\tcase("<<i<<"):\n";
-            std::cout<<"maximal index: "<<max_index<<" of output "<<i<<std::endl;
             // reset all the monomial computation
             for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
                 it->update = false;
@@ -180,7 +203,6 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                 std::vector<ComputedTree >::const_iterator itctree = outputs_.begin();
                 for( ; itout!=output_num_.end(); itout++,itindex++,itctree++ )
                 {
-//                    std::cout<<*itout<<" "<< i<< "       "<<*itindex<<" "<< j <<std::endl;
                     if(*itout == i && *itindex == j)
                     {
                         f<<"\t\t\t\t\t//prepare the basic elements of output "<< i<<" index "<< j<< std::endl;
@@ -200,10 +222,6 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                                 f<<";\n";
 
                         }
-                        std::cout<<"update done"<<std::endl;
-
-
-
                         std::string formula = "return ";
                         // update the monomial
 
@@ -226,10 +244,16 @@ void ComputedTreeList::prepare_file( const std::string & filename)
         }
     }
     f<<"\t\t\tdefault: return 0.;\n";
-    f<<"\n\t\t}\n\t}\n};";
+    f<<"\n\t\t}\n\t}\n};\n\n";
+    f<<"extern \"C\" " + class_name_ +"* create()\n{\n\treturn new " + class_name_ + "();\n}\n\n";
+    f<<"extern \"C\" void destroy(" + class_name_ +"* p)\n{\n\tdelete p;\n}\n\n";
 
+    f.close();
 
-      f.close();
+    // Create the library
+    std::string command = "g++ -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
+    std::cout<<"Compilation command is : "<< command<<std::endl;
+    system ( command.c_str() );
 }
 
 std::vector<Monomial*> ComputedTreeList::get_monomial_update_list( const ComputedTree* in) const
@@ -237,12 +261,8 @@ std::vector<Monomial*> ComputedTreeList::get_monomial_update_list( const Compute
     std::vector<Monomial*> out;
     for (std::map<Monomial*,long double>::const_iterator it= in->polynomial_.begin(); it!= in->polynomial_.end(); it++)
     {
-        std::cout<<"looking at "<< it->first->name <<"  depending on "<< it->first->mono.size()<<" inputs update = "<< it->first->update <<std::endl;
         if (!(it->first)->update &&  (it->first)->mono.size()!= 1)
-        {
             out.push_back((it->first));
-//            std::cout<<"it->first = "<< it->first<<std::endl;
-        }
 
     }
     return out;

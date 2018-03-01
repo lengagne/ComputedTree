@@ -33,3 +33,4 @@
 
 # compilation
 build
+include/config_ComputedTree.h

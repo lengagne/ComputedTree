@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <algorithm>
+#include "AbstractGeneratedCode.h"
 
 class ComputedTree;
 
@@ -35,6 +36,8 @@ class ComputedTree
         {
             return name_;
         }
+
+        AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
 

@@ -53,8 +53,8 @@ file( GLOB_RECURSE ComputedTree_SOURCES src/*.cpp )
 FILE( GLOB_RECURSE ComputedTree_HEADERS include/*.h   include/*.hxx )
 
 include_directories(	include
-			${TCMALLOC_INCLUDE_DIRS}
-			)
+                        ${TCMALLOC_INCLUDE_DIRS}
+                        )
 
 link_directories(	${CMAKE_BINARY_DIR}/lib/${CMAKE_BUILD_TYPE}
                     ${TCMALLOC_LIBRARY_DIRS})
@@ -69,6 +69,7 @@ add_executable (TestTree apps/test_tree.cpp)
 
 target_link_libraries(	TestTree
  						ComputedTree
+ 						dl
 						)
 
 
@@ -77,11 +78,14 @@ SET(INSTALL_INCLUDE_DIRS ${CMAKE_INSTALL_INCLUDEDIR}/include/ComputedTree)
 
 ### Configure file
 get_property(Include_Directories DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-SET(ComputedTree_INCLUDE_DIRS ${INSTALL_INCLUDE_DIRS} CACHE INTERNAL "")
+SET(ComputedTree_INCLUDE_DIRS ${Include_Directories} ${INSTALL_INCLUDE_DIRS} CACHE INTERNAL "")
 SET(ComputedTree_FLAGS ${CMAKE_CXX_FLAGS} CACHE INTERNAL "")
 SET(ComputedTree_FOUND "TRUE" CACHE INTERNAL "")
 
 configure_file(ComputedTreeConfig.cmake.in "${PROJECT_BINARY_DIR}/ComputedTreeConfig.cmake" @ONLY)
+
+configure_file ("${PROJECT_SOURCE_DIR}/config_ComputedTree.h.in"
+                "${PROJECT_SOURCE_DIR}/include/config_ComputedTree.h" )
 
 install( FILES ${ComputedTree_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIRS})
 

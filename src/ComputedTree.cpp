@@ -48,9 +48,7 @@ void update_name(Monomial* m)
     for (std::list<ComputedTree*>::iterator it=m->mono.begin(); it!=m->mono.end(); it++)
     {
         m->name += (*it)->get_name();
-        std::cout<<*(*it)<<std::endl;
     }
-    std::cout<<"update_name(Monomial*m) name = "<< m->name<<std::endl;
 }
 
 ComputedTree::ComputedTree():value_(0)
@@ -71,6 +69,11 @@ ComputedTree::ComputedTree(const ComputedTree& other):value_(other.value_), poly
 ComputedTree::ComputedTree(const long double& input)
 {
     value_ = input;
+}
+
+AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
+{
+    return chief_.get_recompile_code(libname);
 }
 
 void ComputedTree::prepare_file( const std::string & filename)
@@ -132,7 +135,6 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
             const Monomial& m2 = *(iterin->first);
             Monomial tmp = merge_monomial(m1,m2);
             Monomial* good = chief_.add_intermediate(tmp);
-//            std::cout<<"good = "<< good <<std::endl;
             out.polynomial_[good] += iterthis->second * iterin->second ;
         }
     }
