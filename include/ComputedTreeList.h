@@ -26,21 +26,25 @@ class ComputedTreeList
 
         Monomial* add_input(ComputedTree* in);
 
+        Monomial* add_intermediate(Monomial& in);
+
         /// add output
         /// index is the number of the output
         /// out is to create new independant value (no redundant computation are perform for the same output)
-        void add_output(ComputedTree* in,
+        void add_output(const ComputedTree& in,
                         unsigned int index,
                         unsigned int out=0);
+
+        std::vector<Monomial*> get_monomial_update_list( const ComputedTree* in) const;
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
     private:
 
     std::list<ComputedTree* > inputs_;
 
-    std::list<Monomial*> monomials_;
+    std::list<Monomial> monomials_;
 
-    std::vector<ComputedTree* > outputs_;
+    std::vector<ComputedTree > outputs_;
     std::vector<unsigned int > output_num_;
     std::vector<unsigned int > output_index_;
     long double updated_value_;

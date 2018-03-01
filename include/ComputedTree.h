@@ -13,6 +13,11 @@ typedef struct Monomial{
     std::string name;
 }Monomial;
 
+Monomial merge_monomial(const Monomial& m1, const Monomial& m2);
+
+bool operator==(const Monomial& a, const Monomial&b);
+std::ostream& operator<<(std::ostream& os, const Monomial& obj);
+
 void update_name(Monomial* m);
 
 class ComputedTree
@@ -41,11 +46,20 @@ class ComputedTree
 
         ComputedTree operator* (const long double & d) const;
 
+        ComputedTree operator+ (const ComputedTree& in) const;
+        ComputedTree operator- (const ComputedTree& in) const;
+        ComputedTree operator* (const ComputedTree& in) const;
+
 //    protected:
 //    private:
         std::map<Monomial*,long double> polynomial_;
-        long double* value_;
+        long double value_;
         std::string name_;
 };
+
+inline ComputedTree operator * (const long double b, const ComputedTree & a)
+{
+    return a*b;
+}
 
 #endif // COMPUTEDTREE_H

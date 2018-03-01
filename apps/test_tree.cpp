@@ -12,17 +12,30 @@ int main()
 	b.set_as_input("b");
 
     ComputedTree c = a*2.12332223365000005;
-    ComputedTree d = a*(-2.3);
-    ComputedTree e = a*20.3;
+    ComputedTree d = a*(-2.3) + b;
+    std::cout<<"d = "<< d <<std::endl;
+    ComputedTree e = a*20.3 - 2.000*b;
     ComputedTree f = b*123456789.987654321;
 
-    c.set_as_output(17,0,"c");
-    d.set_as_output(2,10,"d");
-    e.set_as_output(0,1,"e");
-    f.set_as_output(1,1,"f");
+    ComputedTree g = a*b;
+    ComputedTree h = a*a - 2*a*b + b*b; //(a-2.0)*(b-2.0);
+    ComputedTree i = (a+b)*a;
+    std::cout<<"i = "<< i <<std::endl;
+    ComputedTree j =  (a+b)*(a-b);
+    std::cout<<"j = "<< j <<std::endl;
+    ComputedTree k =  j*i;
 
+    c.set_as_output(0,0,"c");
+    f.set_as_output(1,0,"f");
+    d.set_as_output(0,1,"d");
+    e.set_as_output(1,1,"e");
+    g.set_as_output(0,2,"g");
+    h.set_as_output(1,2,"h");
+    i.set_as_output(0,3,"i");
+    j.set_as_output(1,3,"j");
+    k.set_as_output(2,3,"k");
 
-    c.prepare_file();
+    j.prepare_file();
     std::cout<<"end of the program"<<std::endl;
 	return 0;
 }
