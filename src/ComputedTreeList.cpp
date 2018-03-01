@@ -1,4 +1,4 @@
-        #include "ComputedTreeList.h"
+#include "ComputedTreeList.h"
 #include <iostream>
 #include <fstream>
 
@@ -45,6 +45,34 @@ Monomial* ComputedTreeList::add_intermediate(Monomial& in)
     }
 }
 
+ComputedTree ComputedTreeList::add_non_linear_input(  ComputedTree*in,
+                                                   const NLType& t)
+{
+    // check if this nonlinear already exists.
+    for (std::list<ComputedTree* >::const_iterator it = nonlinear_inputs_.begin(); it != nonlinear_inputs_.end();it++)
+    {
+        if( (*it)->nonlinear_dad_ == std::pair<ComputedTree*, NLType >(in,t))
+            return *(*it);
+    }
+
+    ComputedTree* nl = new ComputedTree();
+    switch(t)
+    {
+        case(COS):  nl->name_ = "cos_" + in->get_name();    break;
+        case(SIN):  nl->name_ = "sin_" + in->get_name();    break;
+    }
+
+    Monomial* tmp = new Monomial;
+    tmp->mono.push_back(nl);
+    update_name(tmp);
+    nl->polynomial_[tmp] = 1.0;
+    in->nonlinear_sons_[nl] = t;
+    nl->nonlinear_dad_ = std::pair<ComputedTree*, NLType >(in,t);
+    nonlinear_inputs_.push_back(nl);
+    std::cout<<"add_non_linear "<<*nl<<std::endl;
+    return *nl;
+}
+
 void ComputedTreeList::add_output(  const ComputedTree& in,
                                     unsigned int index,
                                     unsigned int out)
@@ -77,22 +105,33 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     std::string class_name  = filename;
     class_name.erase(class_name.find_last_of("."), std::string::npos);
+    f<<"#include <vector>\n#include <math.h>\n\n";
+    f<<"class "<<class_name<<"\n{\npublic:\n";
 
-    f<<"class "<<class_name<<"\n{\n";
-
-    f<<"\tunsigned int nb_in = "<< nb_in <<";\n";
+    f<<"\tunsigned int get_nb_in()const \n\t{\treturn "<< nb_in <<";}\n\n";
     f<<"\t // temporary variables\n";
-
+    for (std::list<ComputedTree*>::iterator it=nonlinear_inputs_.begin(); it!=nonlinear_inputs_.end(); it++)
+        f<<"\tlong double "<<(*it)->get_name()<<";\n";
     for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
-    {
         f<<"\tlong double "<<it->name<<";\n";
-    }
+
     unsigned int cpt = 0;
 
-    f<<"\tlong double set_input(std::vector<long double> & in)\n\t{\n";
+    f<<"\n\n\tlong double set_input(std::vector<long double> & in)\n\t{\n";
     for (std::list<ComputedTree*>::const_iterator it=inputs_.begin(); it!=inputs_.end(); it++)
-        f<< "\t\t"<< (*it)->get_name() <<" = "<<" in["<<cpt++<<"];"<<std::endl;
-
+    {
+        const ComputedTree& tree = *(*it);
+        f<< "\t\t"<< tree.get_name() <<" = "<<" in["<<cpt++<<"];"<<std::endl;
+        for(std::map<ComputedTree*,NLType>::const_iterator itsons = tree.nonlinear_sons_.begin(); itsons!= tree.nonlinear_sons_.end(); itsons++)
+        {
+            f<< "\t\t"<< itsons->first->name_ <<" = ";
+            switch(itsons->second)
+            {
+                case(COS):  f<<"cos("<<tree.get_name() <<");\n";    break;
+                case(SIN):  f<<"sin("<<tree.get_name() <<");\n";    break;
+            }
+        }
+    }
     f<<"\t}\n\n";
 
     f<<"\tlong double function(unsigned int out, unsigned int index)\n\t{\n\t\tswitch(out)\n\t\t{\n";
@@ -158,7 +197,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                                 {
                                     f<<"*"<< (*itct)->get_name();
                                 }
-                                f<<"\n";
+                                f<<";\n";
 
                         }
                         std::cout<<"update done"<<std::endl;

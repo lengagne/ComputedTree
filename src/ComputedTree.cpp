@@ -27,7 +27,9 @@ bool operator==(const Monomial& a, const Monomial&b)
     std::list<ComputedTree*>::const_iterator ita =a.mono.begin();
     std::list<ComputedTree*>::const_iterator itb =b.mono.begin();
     for (; ita!=a.mono.end(); ita++,itb++)
+    {
         if(*ita != *itb)    return false;
+    }
     return true;
 }
 
@@ -61,7 +63,7 @@ ComputedTree::~ComputedTree()
 
 }
 
-ComputedTree::ComputedTree(const ComputedTree& other):value_(other.value_), polynomial_(other.polynomial_)
+ComputedTree::ComputedTree(const ComputedTree& other):value_(other.value_), polynomial_(other.polynomial_),name_(other.name_)
 {
 
 }
@@ -137,19 +139,26 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
     return out;
 }
 
+ComputedTree cos(ComputedTree& in)
+{
+    return chief_.add_non_linear_input(&in,COS);
+}
+
+ComputedTree sin(ComputedTree& in)
+{
+    return chief_.add_non_linear_input(&in,SIN);
+}
+
+
 std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
-    os<<"name:"<<obj.name_<<" ";
-    if(obj.value_)
-        os<<(obj.value_);
-    else
-        os<<"not_defined";
-
-    os<<":";
+    os<<"name:"<<obj.name_<<" "<< obj.value_<":";
     for (std::map<Monomial*,long double>::const_iterator it = obj.polynomial_.begin(); it != obj.polynomial_.end();it++)
     {
         os<<"+"<< it->second<< *(it->first) ;
     }
     return os;
 }
+
+
 

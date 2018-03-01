@@ -28,6 +28,9 @@ class ComputedTreeList
 
         Monomial* add_intermediate(Monomial& in);
 
+        ComputedTree add_non_linear_input( ComputedTree*in,
+                                        const NLType& t);
+
         /// add output
         /// index is the number of the output
         /// out is to create new independant value (no redundant computation are perform for the same output)
@@ -41,6 +44,7 @@ class ComputedTreeList
     private:
 
     std::list<ComputedTree* > inputs_;
+    std::list<ComputedTree* > nonlinear_inputs_;
 
     std::list<Monomial> monomials_;
 

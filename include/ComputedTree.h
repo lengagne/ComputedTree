@@ -6,6 +6,8 @@
 
 class ComputedTree;
 
+typedef enum {COS, SIN }NLType;
+
 typedef struct Monomial{
     std::list<ComputedTree* > mono;
     long double value;      // used to estimate the value
@@ -55,7 +57,15 @@ class ComputedTree
         std::map<Monomial*,long double> polynomial_;
         long double value_;
         std::string name_;
+
+        std::map<ComputedTree*, NLType > nonlinear_sons_;
+
+        std::pair<ComputedTree*, NLType > nonlinear_dad_;
 };
+
+// cos and sin function can be used only for alone inputs
+ComputedTree cos(ComputedTree& in);
+ComputedTree sin(ComputedTree& in);
 
 inline ComputedTree operator * (const long double b, const ComputedTree & a)
 {

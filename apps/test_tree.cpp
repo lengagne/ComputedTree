@@ -35,6 +35,14 @@ int main()
     j.set_as_output(1,3,"j");
     k.set_as_output(2,3,"k");
 
+    ComputedTree ca = cos(a);
+    ComputedTree cb = cos(a) * sin(b) - cos(b) * sin(a);
+    ComputedTree cc = k*(cos(a) * sin(b) - cos(b) * sin(a));
+    std::cout<<"CA = "<< ca <<std::endl;
+    ca.set_as_output(0,4,"ca");
+    cb.set_as_output(1,4,"cb");
+    cc.set_as_output(2,4,"cc");
+
     j.prepare_file();
     std::cout<<"end of the program"<<std::endl;
 	return 0;
