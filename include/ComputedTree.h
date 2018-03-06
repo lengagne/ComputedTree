@@ -11,7 +11,7 @@ typedef enum {COS, SIN }NLType;
 
 typedef struct Monomial{
     std::list<ComputedTree* > mono;
-    long double value;      // used to estimate the value
+    double value;      // used to estimate the value
     bool update = false;    // used to create the file
     std::string name;
 }Monomial;
@@ -30,7 +30,7 @@ class ComputedTree
         virtual ~ComputedTree();
         ComputedTree(const ComputedTree& other);
 
-        ComputedTree(const long double& input);
+        ComputedTree(const double& input);
 
         std::string get_name() const
         {
@@ -47,18 +47,22 @@ class ComputedTree
                             unsigned int num_out=0,
                             const std::string& name="undefined");
 
+	void set_name(const std::string & n)
+	{
+		name_ = n;
+	}
+
         friend std::ostream& operator<<(std::ostream& os, const ComputedTree& obj);
 
-        ComputedTree operator* (const long double & d) const;
-
+        ComputedTree operator* (const double & d) const;
         ComputedTree operator+ (const ComputedTree& in) const;
         ComputedTree operator- (const ComputedTree& in) const;
         ComputedTree operator* (const ComputedTree& in) const;
 
 //    protected:
 //    private:
-        std::map<Monomial*,long double> polynomial_;
-        long double value_;
+        std::map<Monomial*,double> polynomial_;
+        double value_;
         std::string name_;
 
         std::map<ComputedTree*, NLType > nonlinear_sons_;
@@ -70,7 +74,7 @@ class ComputedTree
 ComputedTree cos(ComputedTree& in);
 ComputedTree sin(ComputedTree& in);
 
-inline ComputedTree operator * (const long double b, const ComputedTree & a)
+inline ComputedTree operator * (const double b, const ComputedTree & a)
 {
     return a*b;
 }

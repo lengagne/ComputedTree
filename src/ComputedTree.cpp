@@ -66,7 +66,7 @@ ComputedTree::ComputedTree(const ComputedTree& other):value_(other.value_), poly
 
 }
 
-ComputedTree::ComputedTree(const long double& input)
+ComputedTree::ComputedTree(const double& input)
 {
     value_ = input;
 }
@@ -96,10 +96,10 @@ void ComputedTree::set_as_output(   unsigned int index,
     chief_.add_output(*this,index,num_out);
 }
 
-ComputedTree ComputedTree::operator* (const long double & d) const
+ComputedTree ComputedTree::operator* (const double & d) const
 {
     ComputedTree out;
-    std::map<Monomial*,long double>::const_iterator iter;
+    std::map<Monomial*,double>::const_iterator iter;
     for (iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
         out.polynomial_[iter->first] = iter->second * d;
 
@@ -109,7 +109,7 @@ ComputedTree ComputedTree::operator* (const long double & d) const
 ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 {
     ComputedTree out = *this;
-    std::map<Monomial*,long double>::const_iterator iter;
+    std::map<Monomial*,double>::const_iterator iter;
     for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
             out.polynomial_[iter->first] += iter->second;
     return out;
@@ -118,7 +118,7 @@ ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 {
     ComputedTree out = *this;
-    std::map<Monomial*,long double>::const_iterator iter;
+    std::map<Monomial*,double>::const_iterator iter;
     for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
             out.polynomial_[iter->first] -= iter->second;
     return out;
@@ -127,10 +127,10 @@ ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 {
     ComputedTree out;
-    for (std::map<Monomial*,long double>::const_iterator iterthis = polynomial_.begin(); iterthis != polynomial_.end(); ++iterthis)
+    for (std::map<Monomial*,double>::const_iterator iterthis = polynomial_.begin(); iterthis != polynomial_.end(); ++iterthis)
     {
         const Monomial& m1 = *(iterthis->first);
-        for (std::map<Monomial*,long double>::const_iterator iterin = in.polynomial_.begin(); iterin != in.polynomial_.end(); ++iterin)
+        for (std::map<Monomial*,double>::const_iterator iterin = in.polynomial_.begin(); iterin != in.polynomial_.end(); ++iterin)
         {
             const Monomial& m2 = *(iterin->first);
             Monomial tmp = merge_monomial(m1,m2);
@@ -155,7 +155,7 @@ ComputedTree sin(ComputedTree& in)
 std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
     os<<"name:"<<obj.name_<<" "<< obj.value_<":";
-    for (std::map<Monomial*,long double>::const_iterator it = obj.polynomial_.begin(); it != obj.polynomial_.end();it++)
+    for (std::map<Monomial*,double>::const_iterator it = obj.polynomial_.begin(); it != obj.polynomial_.end();it++)
     {
         os<<"+"<< it->second<< *(it->first) ;
     }

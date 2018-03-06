@@ -8,7 +8,7 @@
 #include <dlfcn.h>
 
 template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = std::numeric_limits<long double>::digits10)
+std::string to_string_with_precision(const T a_value, const int n = std::numeric_limits<double>::digits10)
 {
     std::ostringstream out;
     out << std::setprecision(n) << a_value;
@@ -55,7 +55,7 @@ class ComputedTreeList
     std::vector<ComputedTree > outputs_;
     std::vector<unsigned int > output_num_;
     std::vector<unsigned int > output_index_;
-    long double updated_value_;
+    double updated_value_;
 
     std::string class_name_;
 

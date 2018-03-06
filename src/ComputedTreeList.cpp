@@ -136,13 +136,13 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f<<"\tunsigned int get_nb_in()const \n\t{\treturn "<< nb_in <<";}\n\n";
     f<<"\t // temporary variables\n";
     for (std::list<ComputedTree*>::iterator it=nonlinear_inputs_.begin(); it!=nonlinear_inputs_.end(); it++)
-        f<<"\tlong double "<<(*it)->get_name()<<";\n";
+        f<<"\tdouble "<<(*it)->get_name()<<";\n";
     for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
-        f<<"\tlong double "<<it->name<<";\n";
+        f<<"\tdouble "<<it->name<<";\n";
 
     unsigned int cpt = 0;
 
-    f<<"\n\n\tvoid set_input(std::vector<long double> & in)\n\t{\n";
+    f<<"\n\n\tvoid set_input(std::vector<double> & in)\n\t{\n";
     for (std::list<ComputedTree*>::const_iterator it=inputs_.begin(); it!=inputs_.end(); it++)
     {
         const ComputedTree& tree = *(*it);
@@ -159,7 +159,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     }
     f<<"\t}\n\n";
 
-    f<<"\tlong double function(unsigned int index, unsigned int out=0)\n\t{\n\t\tswitch(out)\n\t\t{\n";
+    f<<"\tdouble function(unsigned int index, unsigned int out=0)\n\t{\n\t\tswitch(out)\n\t\t{\n";
 
     // find max output
     unsigned int nb_output = 0; // std::max_element(output_num_.begin(), output_num_.end()) + 1;
@@ -225,7 +225,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                         std::string formula = "return ";
                         // update the monomial
 
-                        std::map<Monomial*,long double>::const_iterator itpol = itctree->polynomial_.begin();
+                        std::map<Monomial*,double>::const_iterator itpol = itctree->polynomial_.begin();
                         for(itpol ; itpol!=itctree->polynomial_.end(); itpol++)
                         {
                             //(*itpol)
@@ -259,7 +259,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 std::vector<Monomial*> ComputedTreeList::get_monomial_update_list( const ComputedTree* in) const
 {
     std::vector<Monomial*> out;
-    for (std::map<Monomial*,long double>::const_iterator it= in->polynomial_.begin(); it!= in->polynomial_.end(); it++)
+    for (std::map<Monomial*,double>::const_iterator it= in->polynomial_.begin(); it!= in->polynomial_.end(); it++)
     {
         if (!(it->first)->update &&  (it->first)->mono.size()!= 1)
             out.push_back((it->first));
