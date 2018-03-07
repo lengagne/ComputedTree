@@ -7,7 +7,7 @@
 
 class ComputedTree;
 
-typedef enum {COS, SIN }NLType;
+typedef enum {NLCOS, NLSIN }NLType;
 
 typedef struct Monomial{
     std::list<ComputedTree* > mono;
@@ -37,6 +37,12 @@ class ComputedTree
             return name_;
         }
 
+        double get_value() const
+        {
+            return value_;
+        }
+
+
         AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
@@ -47,12 +53,26 @@ class ComputedTree
                             unsigned int num_out=0,
                             const std::string& name="undefined");
 
-	void set_name(const std::string & n)
-	{
-		name_ = n;
-	}
+        void set_input_vector(double d, std::vector<double>& v)
+        {
+            v[input_index_] = d;
+        }
+
+        void set_input_id( unsigned int id)
+        {
+            input_index_ = id;
+        }
+
+        void set_name(const std::string & n)
+        {
+            name_ = n;
+        }
 
         friend std::ostream& operator<<(std::ostream& os, const ComputedTree& obj);
+
+        void operator*= (const double & d);
+        void operator+= (const ComputedTree& in);
+        void operator*= (const ComputedTree& in);
 
         ComputedTree operator* (const double & d) const;
         ComputedTree operator+ (const ComputedTree& in) const;
@@ -64,6 +84,8 @@ class ComputedTree
         std::map<Monomial*,double> polynomial_;
         double value_;
         std::string name_;
+
+        int input_index_ = -1;
 
         std::map<ComputedTree*, NLType > nonlinear_sons_;
 

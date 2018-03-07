@@ -96,6 +96,24 @@ void ComputedTree::set_as_output(   unsigned int index,
     chief_.add_output(*this,index,num_out);
 }
 
+void ComputedTree::operator*= (const double & d)
+{
+    for (std::map<Monomial*,double>::const_iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
+        (iter->first)->value *= d;
+}
+
+void ComputedTree::operator+= (const ComputedTree& in)
+{
+    std::map<Monomial*,double>::const_iterator iter;
+    for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
+            polynomial_[iter->first] += iter->second;
+}
+
+void ComputedTree::operator*= (const ComputedTree& in)
+{
+    *this = *this * in;
+}
+
 ComputedTree ComputedTree::operator* (const double & d) const
 {
     ComputedTree out;
@@ -143,12 +161,12 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 
 ComputedTree cos(ComputedTree& in)
 {
-    return chief_.add_non_linear_input(&in,COS);
+    return chief_.add_non_linear_input(&in,NLCOS);
 }
 
 ComputedTree sin(ComputedTree& in)
 {
-    return chief_.add_non_linear_input(&in,SIN);
+    return chief_.add_non_linear_input(&in,NLSIN);
 }
 
 

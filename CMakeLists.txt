@@ -63,22 +63,24 @@ add_library(ComputedTree SHARED ${ComputedTree_SOURCES})
 
 target_link_libraries(	ComputedTree
                         ${TCMALLOC_LIBRARIES}
+                        dl
                         )
 
 add_executable (TestTree apps/test_tree.cpp)
 
 target_link_libraries(	TestTree
  						ComputedTree
- 						dl
 						)
 
 
 ### installation of the files
 SET(INSTALL_INCLUDE_DIRS ${CMAKE_INSTALL_INCLUDEDIR}/include/ComputedTree)
+SET(INSTALL_LIB_DIRS ${CMAKE_INSTALL_LIBDIR}/lib )
 
 ### Configure file
 get_property(Include_Directories DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 SET(ComputedTree_INCLUDE_DIRS ${Include_Directories} ${INSTALL_INCLUDE_DIRS} CACHE INTERNAL "")
+SET(ComputedTree_LIBRARIES ComputedTree CACHE INTERNAL "")
 SET(ComputedTree_FLAGS ${CMAKE_CXX_FLAGS} CACHE INTERNAL "")
 SET(ComputedTree_FOUND "TRUE" CACHE INTERNAL "")
 
@@ -88,6 +90,7 @@ configure_file ("${PROJECT_SOURCE_DIR}/config_ComputedTree.h.in"
                 "${PROJECT_SOURCE_DIR}/include/config_ComputedTree.h" )
 
 install( FILES ${ComputedTree_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIRS})
+install( TARGETS ComputedTree LIBRARY DESTINATION ${INSTALL_LIB_DIRS}  COMPONENT main)
 
 install(FILES "${PROJECT_BINARY_DIR}/ComputedTreeConfig.cmake"
 	DESTINATION "${INSTALL_LIB_PATH}/ComputedTreeConfig" COMPONENT dev )

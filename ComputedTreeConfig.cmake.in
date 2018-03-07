@@ -9,4 +9,6 @@
 
 SET(ComputedTree_INCLUDE_DIRS @ComputedTree_INCLUDE_DIRS@)
 
+SET(ComputedTree_LIBRARIES @ComputedTree_LIBRARIES@)
+
 SET(ComputedTree_FLAGS @ComputedTree_FLAGS@ )

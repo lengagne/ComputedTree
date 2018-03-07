@@ -58,8 +58,8 @@ ComputedTree ComputedTreeList::add_non_linear_input(  ComputedTree*in,
     ComputedTree* nl = new ComputedTree();
     switch(t)
     {
-        case(COS):  nl->name_ = "cos_" + in->get_name();    break;
-        case(SIN):  nl->name_ = "sin_" + in->get_name();    break;
+        case(NLCOS):  nl->name_ = "cos_" + in->get_name();    break;
+        case(NLSIN):  nl->name_ = "sin_" + in->get_name();    break;
     }
 
     Monomial* tmp = new Monomial;
@@ -152,8 +152,8 @@ void ComputedTreeList::prepare_file( const std::string & filename)
             f<< "\t\t"<< itsons->first->name_ <<" = ";
             switch(itsons->second)
             {
-                case(COS):  f<<"cos("<<tree.get_name() <<");\n";    break;
-                case(SIN):  f<<"sin("<<tree.get_name() <<");\n";    break;
+                case(NLCOS):  f<<"cos("<<tree.get_name() <<");\n";    break;
+                case(NLSIN):  f<<"sin("<<tree.get_name() <<");\n";    break;
             }
         }
     }

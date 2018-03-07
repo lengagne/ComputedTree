@@ -51,7 +51,7 @@ int main()
     AbstractGeneratedCode* recompiled_code = j.get_recompile_code();
     std::cout<<"recompiled_code = "<< recompiled_code <<std::endl;
 
-    std::vector<long double> in(2);
+    std::vector<double> in(2);
     in[0] = 1;
     in[1] = 1.5;
 
