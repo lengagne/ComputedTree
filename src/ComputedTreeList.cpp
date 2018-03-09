@@ -51,10 +51,8 @@ ComputedTree ComputedTreeList::add_non_linear_input(  ComputedTree*in,
 {
     // check if this nonlinear already exists.
     for (std::list<ComputedTree* >::const_iterator it = nonlinear_inputs_.begin(); it != nonlinear_inputs_.end();it++)
-    {
         if( (*it)->nonlinear_dad_ == std::pair<ComputedTree*, NLType >(in,t))
             return *(*it);
-    }
 
     ComputedTree* nl = new ComputedTree();
     switch(t)
@@ -139,11 +137,25 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f<<"class "<<class_name_<<": public AbstractGeneratedCode\n{\npublic:\n";
 
     f<<"\tunsigned int get_nb_in()const \n\t{\n\t\treturn "<< nb_in <<";\n\t}\n\n";
-    f<<"\t // temporary variables\n";
+    f<<"\t // nonlinear variables\n";
     for (std::list<ComputedTree*>::iterator it=nonlinear_inputs_.begin(); it!=nonlinear_inputs_.end(); it++)
         if(!(*it)->is_double()) f<<"\tdouble "<<(*it)->get_name()<<";\n";
+    f<<"\t // temporary variables\n";
     for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
-        if(it->mono.size()>0) f<<"\tdouble "<<it->name<<";\n";
+    {
+        if(it->mono.size()>0)
+        {
+            std::string name = it->name;
+            bool test = true;
+            for (std::list<ComputedTree*>::iterator itn=nonlinear_inputs_.begin(); itn!=nonlinear_inputs_.end(); itn++)
+                if(it->name == (*itn)->get_name())
+                {
+                    test = false; break;
+                }
+             if(test)   f<<"\tdouble "<<it->name<<";\n";
+        }
+    }
+
 
     unsigned int cpt = 0;
 
