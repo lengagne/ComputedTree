@@ -11,7 +11,7 @@ typedef enum {NLCOS, NLSIN }NLType;
 
 typedef struct Monomial{
     std::list<ComputedTree* > mono;
-    double value;      // used to estimate the value
+//    double value;      // used to estimate the value
     bool update = false;    // used to create the file
     std::string name;
 }Monomial;
@@ -37,13 +37,16 @@ class ComputedTree
             return name_;
         }
 
-        double get_value() const
-        {
-            return value_;
-        }
+        // get the value : assume it is double
+        double get_value() const;
+//        {
+//            return value_;
+//        }
 
 
         AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
+
+        bool is_double() const;
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
 
@@ -70,11 +73,15 @@ class ComputedTree
 
         friend std::ostream& operator<<(std::ostream& os, const ComputedTree& obj);
 
+        void operator= (const double & d);
+//        void operator= (const ComputedTree& in);
+
         void operator*= (const double & d);
         void operator+= (const ComputedTree& in);
         void operator*= (const ComputedTree& in);
 
         ComputedTree operator* (const double & d) const;
+        ComputedTree operator/ (const double & d) const;
         ComputedTree operator+ (const ComputedTree& in) const;
         ComputedTree operator- (const ComputedTree& in) const;
         ComputedTree operator* (const ComputedTree& in) const;
@@ -82,7 +89,7 @@ class ComputedTree
 //    protected:
 //    private:
         std::map<Monomial*,double> polynomial_;
-        double value_;
+//        double value_;
         std::string name_;
 
         int input_index_ = -1;

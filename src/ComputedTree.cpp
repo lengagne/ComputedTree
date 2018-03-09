@@ -14,8 +14,13 @@ Monomial merge_monomial(const Monomial& m1, const Monomial& m2)
     for (std::list<ComputedTree*>::const_iterator it=m2.mono.begin(); it!=m2.mono.end(); it++)
         tmp.mono.push_back(*it);
     tmp.mono.sort();
+    unsigned int cpt = 0;
     for (std::list<ComputedTree*>::const_iterator it=tmp.mono.begin(); it!=tmp.mono.end(); it++)
-        tmp.name += "_" + (*it)->get_name();
+    {
+        if(cpt++ == 0)   tmp.name += (*it)->get_name();
+        else tmp.name += "_" + (*it)->get_name();
+    }
+
     return tmp;
 }
 
@@ -51,7 +56,7 @@ void update_name(Monomial* m)
     }
 }
 
-ComputedTree::ComputedTree():value_(0)
+ComputedTree::ComputedTree()//:value_(0)
 {
 
 }
@@ -61,19 +66,48 @@ ComputedTree::~ComputedTree()
 
 }
 
-ComputedTree::ComputedTree(const ComputedTree& other):value_(other.value_), polynomial_(other.polynomial_),name_(other.name_)
+ComputedTree::ComputedTree(const ComputedTree& other): polynomial_(other.polynomial_),name_(other.name_) //, value_(other.value_)
 {
-
+//    std::cout<<"copy constructor other = "<< other <<std::endl;
+//    std::cout<<"copy constructor *this = "<< *this <<std::endl;
 }
 
 ComputedTree::ComputedTree(const double& input)
 {
-    value_ = input;
+//    value_ = input;
+    Monomial* mono = new Monomial; //chief_.add_input(this);
+    mono->name = "fake_double";
+    polynomial_[mono] = input;
 }
 
 AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
 {
     return chief_.get_recompile_code(libname);
+}
+
+double ComputedTree::get_value() const
+{
+    if(is_double())
+    {
+        std::map<Monomial*,double>::const_iterator it = polynomial_.begin();
+        return it->second;
+    }
+
+    // else
+    std::cerr<<"Error in "<<__FILE__<<" at line "<< __LINE__<< " cannot get value of non double"<<std::endl;
+    exit(0);
+}
+
+bool ComputedTree::is_double() const
+{
+     if (polynomial_.size()!=1 )
+        return false;
+
+    std::map<Monomial*,double>::const_iterator it = polynomial_.begin();
+    if ( (it->first)->mono.size() != 0)
+        return false;
+
+    return true;
 }
 
 void ComputedTree::prepare_file( const std::string & filename)
@@ -96,10 +130,31 @@ void ComputedTree::set_as_output(   unsigned int index,
     chief_.add_output(*this,index,num_out);
 }
 
+void ComputedTree::operator= (const double & d)
+{
+//    value_ = d;
+    polynomial_.clear();
+    Monomial* mono = new Monomial; //chief_.add_input(this);
+    mono->name = "fake_double";
+    polynomial_[mono] = d;
+}
+//
+//void ComputedTree::operator= (const ComputedTree& in)
+//{
+//    std::cout<<"operator= other = "<< in <<std::endl;
+//
+//    value_ = in.value_;
+//    polynomial_ = in.polynomial_;
+//    name_ = in.name_;
+//    std::cout<<"operator= *this = "<< *this <<std::endl;
+//}
+
 void ComputedTree::operator*= (const double & d)
 {
-    for (std::map<Monomial*,double>::const_iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
-        (iter->first)->value *= d;
+//    for (std::map<Monomial*,double>::const_iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
+//        (iter->first)->value *= d;
+    for (std::map<Monomial*,double>::iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
+        iter->second *= d;
 }
 
 void ComputedTree::operator+= (const ComputedTree& in)
@@ -124,6 +179,16 @@ ComputedTree ComputedTree::operator* (const double & d) const
     return out;
 }
 
+ComputedTree ComputedTree::operator/ (const double & d) const
+{
+    ComputedTree out;
+    std::map<Monomial*,double>::const_iterator iter;
+    for (iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
+        out.polynomial_[iter->first] = iter->second / d;
+
+    return out;
+}
+
 ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 {
     ComputedTree out = *this;
@@ -144,6 +209,17 @@ ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 
 ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 {
+//    if (polynomial_.size() ==0 && in.polynomial_.size()==0)
+//    {
+//        return ComputedTree( value_ * in.value_);
+//    }else if (polynomial_.size() ==0 )
+//    {
+//        return value_ * in;
+//    }else if (in.polynomial_.size() ==0 )
+//    {
+//        return *this * in.value_;
+//    }
+
     ComputedTree out;
     for (std::map<Monomial*,double>::const_iterator iterthis = polynomial_.begin(); iterthis != polynomial_.end(); ++iterthis)
     {
@@ -172,7 +248,7 @@ ComputedTree sin(ComputedTree& in)
 
 std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
-    os<<"name:"<<obj.name_<<" "<< obj.value_<":";
+//    os<<"name:"<<obj.name_; //<<"##"<< obj.value_<":";
     for (std::map<Monomial*,double>::const_iterator it = obj.polynomial_.begin(); it != obj.polynomial_.end();it++)
     {
         os<<"+"<< it->second<< *(it->first) ;

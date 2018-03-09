@@ -22,6 +22,7 @@ Monomial* ComputedTreeList::add_input(ComputedTree* in)
         update_name(&tmp);
         monomials_.push_back(tmp);
         Monomial* out = &( *std::find(monomials_.begin(), monomials_.end(), tmp));
+        in->input_index_ = inputs_.size()-1;
         return out;
     }
     else
@@ -125,6 +126,10 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 {
     unsigned int nb_in = inputs_.size();
 
+    std::string command = "rm -fv "+ filename;
+    std::cout<<"Compilation command is : "<< command<<std::endl;
+    system ( command.c_str() );
+
     // create the file
     std::ofstream f (filename );
 
@@ -133,12 +138,12 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f<<"#include <vector>\n#include <math.h>\n#include <iostream>\n#include \"AbstractGeneratedCode.h\" \n\n\n";
     f<<"class "<<class_name_<<": public AbstractGeneratedCode\n{\npublic:\n";
 
-    f<<"\tunsigned int get_nb_in()const \n\t{\treturn "<< nb_in <<";}\n\n";
+    f<<"\tunsigned int get_nb_in()const \n\t{\n\t\treturn "<< nb_in <<";\n\t}\n\n";
     f<<"\t // temporary variables\n";
     for (std::list<ComputedTree*>::iterator it=nonlinear_inputs_.begin(); it!=nonlinear_inputs_.end(); it++)
-        f<<"\tdouble "<<(*it)->get_name()<<";\n";
+        if(!(*it)->is_double()) f<<"\tdouble "<<(*it)->get_name()<<";\n";
     for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
-        f<<"\tdouble "<<it->name<<";\n";
+        if(it->mono.size()>0) f<<"\tdouble "<<it->name<<";\n";
 
     unsigned int cpt = 0;
 
@@ -184,17 +189,13 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                     max_index=*itindex;
             }
         }
-
         if(one_find)
         {
-            f<<"\t\t\tcase("<<i<<"):\n";
+            f<<"\t\t\tcase("<<i<<"): // out number "<< i<<" \n";
             // reset all the monomial computation
             for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
                 it->update = false;
-
             f<<"\t\t\t\tswitch(index)\n\t\t\t\t{\n";
-
-
             for (unsigned int j=0;j<=max_index;j++)
             {
                 // try to find if we have to do this index.
@@ -212,6 +213,8 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                         std::vector<Monomial*> mono_list = get_monomial_update_list( & (*itctree) );    // get the list of monomial to update
                         for(std::vector<Monomial*>::iterator itmono= mono_list.begin();itmono!= mono_list.end();itmono++)
                         {
+                            if((*itmono)->mono.size()!=0)
+                            {
                                 (*itmono)->update = true;
                                 f<<"\t\t\t\t\t\t// update of "<< (*itmono)->name<<":\n";
                                 f<<"\t\t\t\t\t\t"<< (*itmono)->name<<" = 1.";
@@ -220,17 +223,22 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                                     f<<"*"<< (*itct)->get_name();
                                 }
                                 f<<";\n";
-
+                            }
                         }
                         std::string formula = "return ";
                         // update the monomial
 
                         std::map<Monomial*,double>::const_iterator itpol = itctree->polynomial_.begin();
+//                        std::cout<<" it = "<< *itctree<<std::endl;
                         for(itpol ; itpol!=itctree->polynomial_.end(); itpol++)
                         {
-                            //(*itpol)
-                            if(itpol->second  > 0)formula += " + ";
-                            formula += to_string_with_precision(itpol->second) + "*" + (itpol->first)->name;
+                            if(itpol->second  != 0)
+                            {
+                                if(itpol->second  >= 0)formula += " + ";
+                                formula += to_string_with_precision(itpol->second);
+                                if( itpol->first->mono.size() >0)
+                                    formula += "*" + (itpol->first)->name;
+                            }
                         }
 
                         // compute the value from all the monomial
@@ -251,7 +259,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f.close();
 
     // Create the library
-    std::string command = "g++ -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
+    command = "g++ -O3 -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
     std::cout<<"Compilation command is : "<< command<<std::endl;
     system ( command.c_str() );
 }
