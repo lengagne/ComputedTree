@@ -97,10 +97,9 @@ AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & 
 {
     std::string lib;
     if (libname =="")
-        lib = "lib"+class_name_ +".so";
+        lib = "./lib"+class_name_ +".so";
     else
         lib = libname;
-
 
     void* library =dlopen(lib.c_str(), RTLD_LAZY);
     if (!library) {
@@ -220,6 +219,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                     {
                         f<<"\t\t\t\t\t//prepare the basic elements of output "<< i<<" index "<< j<< std::endl;
                         f<<"\t\t\t\t\tcase("<<j<<"):\n";
+			unsigned int n_mul = 0;
 
                         // update the intermediate value
                         std::vector<Monomial*> mono_list = get_monomial_update_list( & (*itctree) );    // get the list of monomial to update
@@ -233,6 +233,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                                 for(std::list<ComputedTree*>::const_iterator itct= (*itmono)->mono.begin();itct!= (*itmono)->mono.end();itct++)
                                 {
                                     f<<"*"<< (*itct)->get_name();
+				    n_mul ++;
                                 }
                                 f<<";\n";
                             }
@@ -254,6 +255,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                         }
 
                         // compute the value from all the monomial
+                        f<<"\t\t\t\t\t\t// There are "<< itctree->polynomial_.size()<<" additions and "<< n_mul<<" multiplications.\n";
                         f<<"\t\t\t\t\t\t"<<formula<<";\n";
                         break;
                     }
