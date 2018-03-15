@@ -78,6 +78,7 @@ class ComputedTree
 
         void operator*= (const double & d);
         void operator+= (const ComputedTree& in);
+        void operator-= (const ComputedTree& in);
         void operator*= (const ComputedTree& in);
 
         ComputedTree operator* (const double & d) const;

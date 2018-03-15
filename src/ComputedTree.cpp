@@ -164,6 +164,13 @@ void ComputedTree::operator+= (const ComputedTree& in)
             polynomial_[iter->first] += iter->second;
 }
 
+void ComputedTree::operator-= (const ComputedTree& in)
+{
+    std::map<Monomial*,double>::const_iterator iter;
+    for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
+            polynomial_[iter->first] -= iter->second;
+}
+
 void ComputedTree::operator*= (const ComputedTree& in)
 {
     *this = *this * in;
