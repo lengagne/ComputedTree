@@ -32,6 +32,9 @@ class ComputedTree
 
         ComputedTree(const double& input);
 
+        // remove reference to zero;
+        void clean_up();
+
         std::string get_name() const
         {
             return name_;

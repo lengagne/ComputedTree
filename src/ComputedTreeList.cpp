@@ -154,7 +154,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
              if(test)   f<<"\tdouble "<<it->name<<";\n";
         }
     }
-
+    f<<"\t // output variables\n";
 
     unsigned int cpt = 0;
 
@@ -202,6 +202,9 @@ void ComputedTreeList::prepare_file( const std::string & filename)
         }
         if(one_find)
         {
+            std::vector<ComputedTree> local_out;
+
+
             f<<"\t\t\tcase("<<i<<"): // out number "<< i<<" \n";
             // reset all the monomial computation
             for (std::list<Monomial>::iterator it=monomials_.begin(); it!=monomials_.end(); it++)
@@ -219,44 +222,72 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                     {
                         f<<"\t\t\t\t\t//prepare the basic elements of output "<< i<<" index "<< j<< std::endl;
                         f<<"\t\t\t\t\tcase("<<j<<"):\n";
-			unsigned int n_mul = 0;
+                        unsigned int n_mul = 0;
 
-                        // update the intermediate value
-                        std::vector<Monomial*> mono_list = get_monomial_update_list( & (*itctree) );    // get the list of monomial to update
-                        for(std::vector<Monomial*>::iterator itmono= mono_list.begin();itmono!= mono_list.end();itmono++)
+                        // trying to see if we can do better computation
+                        const ComputedTree& out = *itctree;
+
+                        unsigned int nb = out.polynomial_.size();
+                        unsigned int n;
+                        int index = -1;
+                        for(unsigned int i=0;i<local_out.size();i++)
                         {
-                            if((*itmono)->mono.size()!=0)
+                            ComputedTree test = out - local_out[i];
+                            test.clean_up();
+                            n = test.polynomial_.size();
+                            if (nb > n)
                             {
-                                (*itmono)->update = true;
-                                f<<"\t\t\t\t\t\t// update of "<< (*itmono)->name<<":\n";
-                                f<<"\t\t\t\t\t\t"<< (*itmono)->name<<" = 1.";
-                                for(std::list<ComputedTree*>::const_iterator itct= (*itmono)->mono.begin();itct!= (*itmono)->mono.end();itct++)
+                                nb = n;
+                                index = i;
+                            }
+                        }
+                        local_out.push_back(out);
+                        //if(index == -1)
+                        {
+                            // create all the variable from polynomials
+                            // update the intermediate value
+                            std::vector<Monomial*> mono_list = get_monomial_update_list( & out );    // get the list of monomial to update
+                            for(std::vector<Monomial*>::iterator itmono= mono_list.begin();itmono!= mono_list.end();itmono++)
+                            {
+                                if((*itmono)->mono.size()!=0)
                                 {
-                                    f<<"*"<< (*itct)->get_name();
-				    n_mul ++;
+                                    (*itmono)->update = true;
+                                    f<<"\t\t\t\t\t\t// update of "<< (*itmono)->name<<":\n";
+                                    f<<"\t\t\t\t\t\t"<< (*itmono)->name<<" = 1.";
+                                    for(std::list<ComputedTree*>::const_iterator itct= (*itmono)->mono.begin();itct!= (*itmono)->mono.end();itct++)
+                                    {
+                                        f<<"*"<< (*itct)->get_name();
+                                        n_mul ++;
+                                    }
+                                    f<<";\n";
                                 }
-                                f<<";\n";
                             }
-                        }
-                        std::string formula = "return ";
-                        // update the monomial
+                            std::string formula = "return ";
+                            // update the monomial
 
-                        std::map<Monomial*,double>::const_iterator itpol = itctree->polynomial_.begin();
-//                        std::cout<<" it = "<< *itctree<<std::endl;
-                        for(itpol ; itpol!=itctree->polynomial_.end(); itpol++)
-                        {
-                            if(itpol->second  != 0)
+                            std::map<Monomial*,double>::const_iterator itpol = out.polynomial_.begin();
+    //                        std::cout<<" it = "<< *itctree<<std::endl;
+                            for(itpol ; itpol!=out.polynomial_.end(); itpol++)
                             {
-                                if(itpol->second  >= 0)formula += " + ";
-                                formula += to_string_with_precision(itpol->second);
-                                if( itpol->first->mono.size() >0)
-                                    formula += "*" + (itpol->first)->name;
+                                if(itpol->second  != 0)
+                                {
+                                    if(itpol->second  >= 0)formula += " + ";
+                                    formula += to_string_with_precision(itpol->second);
+                                    if( itpol->first->mono.size() >0)
+                                        formula += "*" + (itpol->first)->name;
+                                }
                             }
+
+                            // compute the value from all the monomial
+                            f<<"\t\t\t\t\t\t// There are "<< out.polynomial_.size()<<" additions and "<< n_mul<<" multiplications.\n";
+                            f<<"\t\t\t\t\t\t"<<formula<<";\n";
+                        }//else
+
+                        if(index != -1)
+                        {
+                            std::cout<<"ca vaut le coup de le faire  "<<out.polynomial_.size()<<" > "<< n <<std::endl;
                         }
 
-                        // compute the value from all the monomial
-                        f<<"\t\t\t\t\t\t// There are "<< itctree->polynomial_.size()<<" additions and "<< n_mul<<" multiplications.\n";
-                        f<<"\t\t\t\t\t\t"<<formula<<";\n";
                         break;
                     }
                 }

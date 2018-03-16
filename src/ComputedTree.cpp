@@ -80,6 +80,13 @@ ComputedTree::ComputedTree(const double& input)
     polynomial_[mono] = input;
 }
 
+void ComputedTree::clean_up()
+{
+    for (std::map<Monomial*,double>::iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
+        if(iter->second == 0)   polynomial_.erase(iter);
+
+}
+
 AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
 {
     return chief_.get_recompile_code(libname);
@@ -256,10 +263,13 @@ ComputedTree sin(ComputedTree& in)
 std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
 //    os<<"name:"<<obj.name_; //<<"##"<< obj.value_<":";
+    os<<"{";
     for (std::map<Monomial*,double>::const_iterator it = obj.polynomial_.begin(); it != obj.polynomial_.end();it++)
     {
-        os<<"+"<< it->second<< *(it->first) ;
+        if(it != obj.polynomial_.begin())os<<"+";
+        os<< it->second<< *(it->first) ;
     }
+    os<<"}";
     return os;
 }
 
