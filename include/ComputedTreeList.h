@@ -26,41 +26,45 @@ class ComputedTreeList
         ComputedTreeList(){}
         ~ComputedTreeList();
 
-        Monomial* add_input(ComputedTree* in);
+        ComputedTree* add_input(const ComputedTree& in);
 
-        Monomial* add_intermediate(Monomial& in);
-
-        ComputedTree add_non_linear_input( ComputedTree*in,
-                                        const NLType& t);
-
+        ComputedTree* add_intermediate(const ComputedTree& in);
+//
+//        ComputedTree add_non_linear_input( ComputedTree*in,
+//                                            const NLType& t);
+//
         /// add output
         /// index is the number of the output
         /// out is to create new independant value (no redundant computation are perform for the same output)
-        void add_output(const ComputedTree& in,
+        void add_output(ComputedTree* in,
                         unsigned int index,
                         unsigned int out=0);
-
-        std::vector<Monomial*> get_monomial_update_list( const ComputedTree* in) const;
-
-        AbstractGeneratedCode* get_recompile_code(const std::string & libname="");
+//
+//        std::vector<Monomial*> get_monomial_update_list( const ComputedTree* in) const;
+//
+//        AbstractGeneratedCode* get_recompile_code(const std::string & libname="");
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
+
+        void update_var_file(std::ofstream& f , ComputedTree& v, const std::string& val ="");
+
+    void show_all()const;
     private:
 
-    std::list<ComputedTree* > inputs_;
-    std::list<ComputedTree* > nonlinear_inputs_;
-
-    std::list<Monomial> monomials_;
-
-    std::vector<ComputedTree > outputs_;
+    std::vector<ComputedTree*> inputs_;
+//    std::list<ComputedTree* > nonlinear_inputs_;
+//
+    std::vector<ComputedTree*> tmp_var_;
+//
+    std::vector<ComputedTree*> outputs_;
     std::vector<unsigned int > output_num_;
     std::vector<unsigned int > output_index_;
-    double updated_value_;
-
+//    double updated_value_;
+//
     std::string class_name_;
-
-    create_code* creator_;
-    destroy_code* destructor_;
+//
+//    create_code* creator_;
+//    destroy_code* destructor_;
 };
 
 #endif // COMPUTEDTREELIST_H
