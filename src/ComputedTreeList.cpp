@@ -99,7 +99,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     unsigned int nb_in = inputs_.size();
 
     std::string command = "rm -fv "+ filename;
-    std::cout<<"Compilation command is : "<< command<<std::endl;
+//    std::cout<<"Compilation command is : "<< command<<std::endl;
     int dummy = system ( command.c_str() );
 
     // create the file
