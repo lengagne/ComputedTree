@@ -41,31 +41,6 @@ AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libn
     return chief_.get_recompile_code(libname);
 }
 
-//double ComputedTree::get_value() const
-//{
-//    if(is_double())
-//    {
-//        std::map<Monomial*,double>::const_iterator it = polynomial_.begin();
-//        return it->second;
-//    }
-//
-//    // else
-//    std::cerr<<"Error in "<<__FILE__<<" at line "<< __LINE__<< " cannot get value of non double"<<std::endl;
-//    exit(0);
-//}
-//
-//bool ComputedTree::is_double() const
-//{
-//     if (polynomial_.size()!=1 )
-//        return false;
-//
-//    std::map<Monomial*,double>::const_iterator it = polynomial_.begin();
-//    if ( (it->first)->mono.size() != 0)
-//        return false;
-//
-//    return true;
-//}
-
 void ComputedTree::prepare_file( const std::string & filename)
 {
     chief_.prepare_file(filename);
@@ -73,20 +48,11 @@ void ComputedTree::prepare_file( const std::string & filename)
 
 void ComputedTree::set_and_sons(const std::string& tab)
 {
-//    std::cout<<tab<<"set_and_sons : "<<*this <<std::endl;
     updated_ = true;
     if( in1_ && !in1_->is_set())
-    {
-//        std::cout<<tab<<"in1_"<<std::endl;
         in1_->set_and_sons(tab+"\t");
-    }
-
     if( in2_ && !in2_->is_set())
-    {
-//        std::cout<<tab<<"in2_"<<std::endl;
         in2_->set_and_sons(tab+"\t");
-    }
-
 }
 
 
@@ -110,7 +76,6 @@ void ComputedTree::set_as_output(   unsigned int index,
                                     const std::string& name)
 {
     name_ = name;
-    //chief_.add_output(*this,index,num_out);
     chief_.add_output(me_,index,num_out);
 }
 
@@ -163,73 +128,16 @@ ComputedTree ComputedTree::operator- () const
     return out;
 }
 
-//void ComputedTree::operator= (const double & d)
-//{
-////    value_ = d;
-//    polynomial_.clear();
-//    Monomial* mono = new Monomial; //chief_.add_input(this);
-//    mono->name = "fake_double";
-//    polynomial_[mono] = d;
-//}
-//
-//void ComputedTree::operator= (const ComputedTree& in)
-//{
-//    std::cout<<"operator= other = "<< in <<std::endl;
-//
-//    value_ = in.value_;
-//    polynomial_ = in.polynomial_;
-//    name_ = in.name_;
-//    std::cout<<"operator= *this = "<< *this <<std::endl;
-//}
-//
-//void ComputedTree::operator*= (const double & d)
-//{
-//    for (std::map<Monomial*,double>::iterator iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
-//        iter->second *= d;
-//}
-//
-//void ComputedTree::operator+= (const ComputedTree& in)
-//{
-//    std::map<Monomial*,double>::const_iterator iter;
-//    for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
-//            polynomial_[iter->first] += iter->second;
-//}
-//
-//void ComputedTree::operator-= (const ComputedTree& in)
-//{
-//    std::map<Monomial*,double>::const_iterator iter;
-//    for (iter = in.polynomial_.begin(); iter != in.polynomial_.end(); ++iter)
-//            polynomial_[iter->first] -= iter->second;
-//}
-//
-//void ComputedTree::operator*= (const ComputedTree& in)
-//{
-//    *this = *this * in;
-//}
-//
-//ComputedTree ComputedTree::operator* (const double & d) const
-//{
-//    ComputedTree cd(d);
-//    ComputedTree out;
-//    out.in2_ = in1_;
-//    out.in1_ = chief_.add_intermediate(cd);
-//    out.type_ = NLMUL;
-//    out.me_ = chief_.add_intermediate(out);
-//    return out;
-//}
-//
-//ComputedTree ComputedTree::operator/ (const double & d) const
-//{
-//    ComputedTree out;
-//    std::map<Monomial*,double>::const_iterator iter;
-//    for (iter = polynomial_.begin(); iter != polynomial_.end(); ++iter)
-//        out.polynomial_[iter->first] = iter->second / d;
-//
-//    return out;
-//}
-//
 ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 {
+    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+        return in;
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+        return *this;
+
+    if(in.me_->type_ == NLOPP)
+        return *this - *(in.me_->in1_);
+
     ComputedTree out;
     if (me_<in.me_)
     {
@@ -248,7 +156,20 @@ ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 //
 ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 {
+    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+        return -in;
+
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+        return *this;
+
+    if(in.me_->type_ == NLOPP)
+        return *this + *(in.me_->in1_);
+
+
     ComputedTree out;
+    if(me_ == in.me_)   // we do x-x
+        return out;
+
     out.in1_ = me_;
     out.in2_ = in.me_;
     out.type_ = NLSUB;
@@ -259,18 +180,30 @@ ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 
 ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 {
-//    std::cout<<"this = "<< *this <<std::endl;
-//    std::cout<<"in = "<<  in<<std::endl;
-//    std::cout<<"me = "<<  *me_ <<std::endl;
-//    std::cout<<"in.me = "<<  (in.me_) <<std::endl;
-//    std::cout<<"*in.me = "<<  *(in.me_) <<std::endl;
+    if(me_->type_ == NLDOUBLE && me_->value_ == 1)
+        return in;
+
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 1)
+        return *this;
+
+    if(me_->type_ == NLDOUBLE && me_->value_ == -1)
+        return -in;
+
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == -1)
+        return -*this;
+
+    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+        return 0;
+
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+        return 0;
+
     ComputedTree out;
     out.in1_ = me_;
     out.in2_ = in.me_;
     out.type_ = NLMUL;
     out.name_ = get_name() + "*" +in.get_name();
     out.me_ = chief_.add_intermediate(out);
-//    std::cout<<"out = "<<  out <<std::endl;
     return out;
 }
 
