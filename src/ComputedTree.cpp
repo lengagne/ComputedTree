@@ -8,7 +8,7 @@ ComputedTreeList chief_;
 ComputedTree::ComputedTree():   input_index_(-1),name_(""),value_(0),
                                 in1_(0),in2_(0),type_(NLNONE),me_(0)
 {
-
+    me_ = chief_.add_intermediate(*this);
 }
 
 ComputedTree::~ComputedTree()
@@ -35,10 +35,11 @@ std::string ComputedTree::get_tmp_name()
     if(type_==NLDOUBLE) return to_string_with_precision(value_);
     return "tmp[" + std::to_string(tmp_index_) + "]";
 }
-//AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
-//{
-//    return chief_.get_recompile_code(libname);
-//}
+
+AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
+{
+    return chief_.get_recompile_code(libname);
+}
 
 //double ComputedTree::get_value() const
 //{
@@ -72,17 +73,17 @@ void ComputedTree::prepare_file( const std::string & filename)
 
 void ComputedTree::set_and_sons(const std::string& tab)
 {
-    std::cout<<tab<<"set_and_sons : "<<*this <<std::endl;
+//    std::cout<<tab<<"set_and_sons : "<<*this <<std::endl;
     updated_ = true;
     if( in1_ && !in1_->is_set())
     {
-        std::cout<<tab<<"in1_"<<std::endl;
+//        std::cout<<tab<<"in1_"<<std::endl;
         in1_->set_and_sons(tab+"\t");
     }
 
     if( in2_ && !in2_->is_set())
     {
-        std::cout<<tab<<"in2_"<<std::endl;
+//        std::cout<<tab<<"in2_"<<std::endl;
         in2_->set_and_sons(tab+"\t");
     }
 
@@ -93,6 +94,7 @@ void ComputedTree::set_as_input(const std::string& name)
 {
     name_ = name;
     type_ = NLIN;
+    input_index_ = chief_.get_nb_inputs();
     in1_ = chief_.add_input(*this);
     me_ = in1_;
     if(me_) me_->name_ = name;
@@ -110,6 +112,55 @@ void ComputedTree::set_as_output(   unsigned int index,
     name_ = name;
     //chief_.add_output(*this,index,num_out);
     chief_.add_output(me_,index,num_out);
+}
+
+void ComputedTree::operator+= (const ComputedTree& in)
+{
+    if(type_ == NLNONE)
+        *this = in;
+    else if(in.type_ == NLNONE)
+    {
+
+    }else
+    {
+        *this = *this + in;
+    }
+}
+
+void ComputedTree::operator-= (const ComputedTree& in)
+{
+    if(type_ == NLNONE)
+        *this = -in;
+    else if(in.type_ == NLNONE)
+    {
+
+    }else
+    {
+        *this = *this - in;
+    }
+}
+
+void ComputedTree::operator*= (const ComputedTree& in)
+{
+    if(type_ == NLNONE)
+        *this = 0;
+    else if(in.type_ == NLNONE)
+    {
+        *this = 0;
+    }else
+    {
+        *this = *this * in;
+    }
+}
+
+ComputedTree ComputedTree::operator- () const
+{
+    ComputedTree out;
+    out.type_ = NLOPP;
+    out.in1_ = me_;
+    out.name_ = "-" +get_name();
+    out.me_ = chief_.add_intermediate(out);
+    return out;
 }
 
 //void ComputedTree::operator= (const double & d)
@@ -256,6 +307,8 @@ std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
         case(NLSUB):
             os<<"("<<*(obj.in1_)<<"-"<<*(obj.in2_)<<")";
             break;
+        case(NLOPP):
+            os<<"-"<<*(obj.in1_);
         case(NLCOS):
             os<<"cos("<<*(obj.in1_)<<")";
             break;

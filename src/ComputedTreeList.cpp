@@ -40,6 +40,7 @@ ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 {
     ComputedTree *t = new ComputedTree(in);
     tmp_var_.push_back(t);
+    t->me_ = t;
     return t;
 //    std::list<Monomial >::iterator it = std::find(monomials_.begin(), monomials_.end(), in);
 //    if(it == monomials_.end())
@@ -101,32 +102,32 @@ void ComputedTreeList::add_output(  ComputedTree* in,
     output_index_.push_back(index);
 }
 
-//AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & libname)
-//{
-//    std::string lib;
-//    if (libname =="")
-//        lib = "./lib"+class_name_ +".so";
-//    else
-//        lib = libname;
-//
-//    void* library =dlopen(lib.c_str(), RTLD_LAZY);
-//    if (!library) {
-//        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
-//        exit(0);
-//    }
-//    // load the symbols
-//    creator_ = (create_code*) dlsym(library, "create");
-//    destructor_ = (destroy_code*) dlsym(library, "destroy");
-//    if (!creator_ || !destructor_)
-//    {
-//        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
-//        exit(0);
-//    }
-//
-//    return creator_();
-//}
-//
-//
+AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & libname)
+{
+    std::string lib;
+    if (libname =="")
+        lib = "./lib"+class_name_ +".so";
+    else
+        lib = libname;
+
+    void* library =dlopen(lib.c_str(), RTLD_LAZY);
+    if (!library) {
+        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
+        exit(0);
+    }
+    // load the symbols
+    creator_ = (create_code*) dlsym(library, "create");
+    destructor_ = (destroy_code*) dlsym(library, "destroy");
+    if (!creator_ || !destructor_)
+    {
+        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
+        exit(0);
+    }
+
+    return creator_();
+}
+
+
 void ComputedTreeList::prepare_file( const std::string & filename)
 {
     for( std::vector<ComputedTree*>::iterator it = tmp_var_.begin(); it!= tmp_var_.end();++it)
@@ -136,7 +137,6 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     for(std::vector<ComputedTree*>::iterator it = outputs_.begin(); it!=outputs_.end();++it)
     {
-        std::cout<<"out = "<< *(*it)<<std::endl;
         (*it)->set_and_sons();
     }
 
@@ -249,7 +249,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                     {
                         f<<"\t\t\t\t\t//prepare the basic elements of output "<< i<<" index "<< j<< std::endl;
                         f<<"\t\t\t\t\tcase("<<j<<"):\n";
-                        update_var_file( f , *(*itctree),"\t\t\t\t\t");
+                        update_var_file( f , (*itctree),"\t\t\t\t\t");
                         f<<"\t\t\t\t\treturn tmp["<< (*itctree)->get_tmp_index()<<"];\n";
 
 //                        unsigned int n_mul = 0;
@@ -328,10 +328,10 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 //
     f.close();
 //
-//    // Create the library
-//    command = "g++ -O3 -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
-//    std::cout<<"Compilation command is : "<< command<<std::endl;
-//    system ( command.c_str() );
+    // Create the library
+    command = "g++ -O3 -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
+    std::cout<<"Compilation command is : "<< command<<std::endl;
+    system ( command.c_str() );
 }
 
 //std::vector<Monomial*> ComputedTreeList::get_monomial_update_list( const ComputedTree* in) const
@@ -355,28 +355,29 @@ void ComputedTreeList::show_all()const
         std::cout<<"tmp_var["<<i<<"]:"<<tmp_var_[i]->get_name()<<" = "<< *tmp_var_[i]<<std::endl;
 }
 
-void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree& v, const std::string& val)
+void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const std::string& val)
 {
-    v.set();
-    if(v.in1_ && v.in1_->type_ != NLDOUBLE && !v.in1_->is_set())
+    v->set();
+    if(v->in1_ && v->in1_->type_ != NLDOUBLE && !v->in1_->is_set())
     {
-        update_var_file(f,*v.in1_,val);
+        update_var_file(f,v->in1_,val);
     }
-    if(v.in2_ && v.in2_->type_ != NLDOUBLE && !v.in2_->is_set())
+    if(v->in2_ && v->in2_->type_ != NLDOUBLE && !v->in2_->is_set())
     {
-        update_var_file(f,*v.in2_,val);
+        update_var_file(f,v->in2_,val);
     }
 
-    f<<val<<"tmp["<< v.get_tmp_index()<<"] = ";
-    switch(v.type_)
+    f<<val<<"tmp["<< v->get_tmp_index()<<"] = ";
+    switch(v->type_)
     {
-        case(NLCOS):    f<<"cos("<<v.in1_->get_tmp_name()<<");"; break;
-        case(NLSIN):    f<<"sin("<<v.in1_->get_tmp_name()<<");"; break;
-        case(NLOPP):    f<<"- "<<v.in1_->get_tmp_name()<<";"; break;
-        case(NLADD):    f<<v.in1_->get_tmp_name()<<"+"<< v.in2_->get_tmp_name()<<";"; break;
-        case(NLMUL):    f<<v.in1_->get_tmp_name()<<"*"<< v.in2_->get_tmp_name()<<";"; break;
-        case(NLSUB):    f<<v.in1_->get_tmp_name()<<"-"<< v.in2_->get_tmp_name()<<";"; break;
+        case(NLCOS):    f<<"cos("<<v->in1_->get_tmp_name()<<");"; break;
+        case(NLSIN):    f<<"sin("<<v->in1_->get_tmp_name()<<");"; break;
+        case(NLOPP):    f<<"- "<<v->in1_->get_tmp_name()<<";"; break;
+        case(NLADD):    f<<v->in1_->get_tmp_name()<<"+"<< v->in2_->get_tmp_name()<<";"; break;
+        case(NLMUL):    f<<v->in1_->get_tmp_name()<<"*"<< v->in2_->get_tmp_name()<<";"; break;
+        case(NLSUB):    f<<v->in1_->get_tmp_name()<<"-"<< v->in2_->get_tmp_name()<<";"; break;
+        default:    break;
     }
-    f<<val<<"//"<< v.get_name()<<"\n";
+    f<<"\n";
 
 }

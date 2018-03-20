@@ -33,9 +33,9 @@ class ComputedTree
 //
 //        // get the value : assume it is double
 //        double get_value() const;
-//
-//        AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
-//
+
+        AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
+
 //        bool is_double() const;
 //
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
@@ -45,16 +45,16 @@ class ComputedTree
         void set_as_output( unsigned int index,
                             unsigned int num_out=0,
                             const std::string& name="undefined");
-//
-//        void set_input_vector(double d, std::vector<double>& v)
-//        {
-//            v[input_index_] = d;
-//        }
-//
-//        void set_input_id( unsigned int id)
-//        {
-//            input_index_ = id;
-//        }
+
+        void set_input_vector(double d, std::vector<double>& v)
+        {
+            v[input_index_] = d;
+        }
+
+        void set_input_id( unsigned int id)
+        {
+            input_index_ = id;
+        }
 
         void set_name(const std::string & n)
         {
@@ -67,11 +67,17 @@ class ComputedTree
 //        void operator= (const double & d);
 ////        void operator= (const ComputedTree& in);
 //
-//        void operator*= (const double & d);
-//        void operator+= (const ComputedTree& in);
-//        void operator-= (const ComputedTree& in);
-//        void operator*= (const ComputedTree& in);
-//
+        void operator*= (const double & d)
+        {
+            *this = *this * d;
+        }
+
+        void operator+= (const ComputedTree& in);
+        void operator-= (const ComputedTree& in);
+        void operator*= (const ComputedTree& in);
+
+        ComputedTree operator- () const;
+
         inline ComputedTree operator* (const double & d) const
         {
             return (ComputedTree(d)) *  (*this);
