@@ -182,8 +182,8 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f.close();
     // Create the library
     command = "g++ -O3 -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
-    std::cout<<"Compilation command is : "<< command<<std::endl;
-    system ( command.c_str() );
+//    std::cout<<"Compilation command is : "<< command<<std::endl;
+    dummy = system ( command.c_str() );
 }
 
 void ComputedTreeList::show_all()const
