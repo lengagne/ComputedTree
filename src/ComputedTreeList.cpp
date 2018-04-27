@@ -67,19 +67,26 @@ AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & 
     else
         lib = libname;
 
-    void* library =dlopen(lib.c_str(), RTLD_LAZY);
-    if (!library) {
-        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
-        exit(0);
-    }
+    unsigned int count = 0;
+    void* library;
+    do{
+        library =dlopen(lib.c_str(), RTLD_LAZY);
+        if (!library) {
+            std::cerr <<"Error1 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
+//            exit(0);
+        }
+    }while(!library);
     // load the symbols
+
+    do{
     creator_ = (create_code*) dlsym(library, "create");
     destructor_ = (destroy_code*) dlsym(library, "destroy");
     if (!creator_ || !destructor_)
     {
-        std::cerr <<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
-        exit(0);
+        std::cerr <<"Error2 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
+//        exit(0);
     }
+    }while(!creator_ || ! destructor_);
 
     return creator_();
 }

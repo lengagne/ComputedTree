@@ -8,7 +8,7 @@ ComputedTreeList chief_;
 ComputedTree::ComputedTree():   input_index_(-1),name_(""),value_(0),
                                 in1_(0),in2_(0),type_(NLNONE),me_(0)
 {
-    //me_ = chief_.add_intermediate(*this);
+    me_ = chief_.add_intermediate(*this);
 }
 
 ComputedTree::~ComputedTree()
