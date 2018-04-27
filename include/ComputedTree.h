@@ -18,6 +18,10 @@ class ComputedTree
 
         ComputedTree(const double& input);
 
+        static void TreeList_clear_all();
+
+        double eval();
+
         std::string get_name() const
         {
             return name_;
@@ -28,7 +32,9 @@ class ComputedTree
             return tmp_index_;
         }
 
-        std::string get_tmp_name();
+        std::string get_tmp_name() const;
+
+        unsigned int get_nb_tmp()const;
 
 //
 //        // get the value : assume it is double
@@ -49,6 +55,8 @@ class ComputedTree
         void set_input_vector(double d, std::vector<double>& v)
         {
             v[input_index_] = d;
+            value_ = d;
+            me_->value_ = d;
         }
 
         void set_input_id( unsigned int id)
@@ -87,6 +95,9 @@ class ComputedTree
         ComputedTree operator- (const ComputedTree& in) const;
         ComputedTree operator* (const ComputedTree& in) const;
 
+        bool is_not_null()const;
+
+
         bool is_set()const
         {
             return updated_;
@@ -103,6 +114,8 @@ class ComputedTree
         {
             tmp_index_ = id;
         }
+
+        void reset_all();
 
         void reset()
         {

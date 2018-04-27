@@ -8,7 +8,7 @@ ComputedTreeList chief_;
 ComputedTree::ComputedTree():   input_index_(-1),name_(""),value_(0),
                                 in1_(0),in2_(0),type_(NLNONE),me_(0)
 {
-    me_ = chief_.add_intermediate(*this);
+    //me_ = chief_.add_intermediate(*this);
 }
 
 ComputedTree::~ComputedTree()
@@ -30,10 +30,54 @@ ComputedTree::ComputedTree(const double& input):input_index_(-1),value_(input),
     name_ = to_string_with_precision(input);
 }
 
-std::string ComputedTree::get_tmp_name()
+void ComputedTree::TreeList_clear_all()
+{
+    chief_.clear_all();
+}
+
+double ComputedTree::eval()
+{
+    if(updated_)
+    {
+        return value_;
+    }
+
+    updated_ = true;
+    switch(type_)
+    {
+        case(NLMUL):
+            value_ = in1_->eval() * in2_->eval();
+            break;
+        case(NLADD):
+            value_ = in1_->eval() + in2_->eval();
+            break;
+        case(NLSUB):
+            value_ = in1_->eval() - in2_->eval();
+            break;
+        case(NLOPP):
+            value_ = -in1_->eval();
+        case(NLCOS):
+            value_ = cos(in1_->eval());
+            break;
+        case(NLSIN):
+            value_ = sin(in1_->eval());
+            break;
+//        default: ;
+    }
+//    std::cout<<name_<<" = "<< value_ <<std::endl;
+    return value_;
+
+}
+
+std::string ComputedTree::ComputedTree::get_tmp_name() const
 {
     if(type_==NLDOUBLE) return to_string_with_precision(value_);
-    return "tmp[" + std::to_string(tmp_index_) + "]";
+    return "t[" + std::to_string(tmp_index_) + "]";
+}
+
+unsigned int ComputedTree::get_nb_tmp()const
+{
+    return chief_.get_nb_tmp();
 }
 
 AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libname)const
@@ -41,9 +85,22 @@ AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libn
     return chief_.get_recompile_code(libname);
 }
 
+bool ComputedTree::is_not_null()const
+{
+    if (type_ == NLDOUBLE && value_ == 0)   return false;
+    return true;
+}
+
+
 void ComputedTree::prepare_file( const std::string & filename)
 {
     chief_.prepare_file(filename);
+}
+
+void ComputedTree::reset_all()
+{
+    reset();
+    chief_.reset();
 }
 
 void ComputedTree::set_and_sons(const std::string& tab)

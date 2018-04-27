@@ -18,6 +18,9 @@ ComputedTree* ComputedTreeList::add_input(const ComputedTree& in)
 ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 {
     ComputedTree *t = new ComputedTree(in);
+//    for (int i=0;i<tmp_var_.size();i++)
+//        if(tmp_var_[i] == t)
+//            std::cout<<"found equality"<<std::endl;
     tmp_var_.push_back(t);
     t->me_ = t;
     return t;
@@ -45,6 +48,17 @@ void ComputedTreeList::add_output(  ComputedTree* in,
     output_index_.push_back(index);
 }
 
+void ComputedTreeList::clear_all()
+{
+    reset();
+    inputs_.clear();
+    tmp_var_.clear();
+    outputs_.clear();
+    output_num_.clear();
+    output_index_.clear();;
+//    double updated_value_;
+}
+
 AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & libname)
 {
     std::string lib;
@@ -70,13 +84,20 @@ AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & 
     return creator_();
 }
 
+void ComputedTreeList::reset()
+{
+//    std::cout<<"ComputedTreeList::reset()"<<std::endl;
+    for( std::vector<ComputedTree*>::iterator it = tmp_var_.begin(); it!= tmp_var_.end();++it)
+        (*it)->reset();
+    for( std::vector<ComputedTree*>::iterator it = outputs_.begin(); it!= outputs_.end();++it)
+        (*it)->reset();
+
+}
 
 void ComputedTreeList::prepare_file( const std::string & filename)
 {
-    for( std::vector<ComputedTree*>::iterator it = tmp_var_.begin(); it!= tmp_var_.end();++it)
-    {
-        (*it)->reset();
-    }
+//    std::cout<<"ComputedTreeList::prepare_file step 2"<<std::endl;
+    reset();
 
     for(std::vector<ComputedTree*>::iterator it = outputs_.begin(); it!=outputs_.end();++it)
     {
@@ -98,10 +119,10 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     unsigned int nb_in = inputs_.size();
 
-    std::string command = "rm -fv "+ filename;
+    std::string command = "rm -f "+ filename;
 //    std::cout<<"Compilation command is : "<< command<<std::endl;
     int dummy = system ( command.c_str() );
-
+//    std::cout<<"ComputedTreeList::prepare_file step 2"<<std::endl;
     // create the file
     std::ofstream f (filename );
 
@@ -112,13 +133,16 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     f<<"\tunsigned int get_nb_in()const \n\t{\n\t\treturn "<< nb_in <<";\n\t}\n\n";
     f<<"\t // intermediate variables\n";
-    f<<"\tdouble tmp["<<nb_v<<"];\n";
+    f<<"\tdouble t["<<nb_v<<"];\n";
+    used_.resize(nb_v);
+    for (int i=0;i<nb_v;i++)    used_[i] = false;
+
     unsigned int cpt = 0;
     f<<"\n\n\tvoid set_input(std::vector<double> & in)\n\t{\n";
     for (std::vector<ComputedTree*>::const_iterator it=inputs_.begin(); it!=inputs_.end(); it++)
     {
         const ComputedTree& tree = *(*it);
-        f<< "\t\ttmp["<< tree.get_tmp_index()<<"] =  in["<<cpt++<<"];"<<std::endl;
+        f<< "\t\tt["<< tree.get_tmp_index()<<"] =  in["<<cpt++<<"];"<<std::endl;
     }
     f<<"\t}\n\n";
 //
@@ -129,8 +153,10 @@ void ComputedTreeList::prepare_file( const std::string & filename)
         if(*it > nb_output)
             nb_output=*it;
     nb_output ++;
+//    std::cout<<"ComputedTreeList::prepare_file step 3"<<std::endl;
     for (unsigned int i=0;i<nb_output;i++)
     {
+//        std::cout<<"ComputedTreeList::prepare_file step 4 "<<i<<" / "<< nb_output<<std::endl;
         // find the maximal index for this output
         unsigned int max_index = 0;
         bool one_find = false;  // allows to know if one index is found for the output
@@ -162,11 +188,11 @@ void ComputedTreeList::prepare_file( const std::string & filename)
                 std::vector<ComputedTree* >::const_iterator itctree = outputs_.begin();
                 for( ; itout!=output_num_.end(); itout++,itindex++,itctree++ )
                 {
-                    if(*itout == i && *itindex == j)
+                    if(*itout == i && *itindex == j && (*itctree)->is_not_null() )
                     {
                         f<<"\t\t\t\t\tcase("<<j<<"):\n";
                         update_var_file( f , (*itctree),"\t\t\t\t\t");
-                        f<<"\t\t\t\t\treturn tmp["<< (*itctree)->get_tmp_index()<<"];\n";
+                        f<<"\t\t\t\t\treturn t["<< (*itctree)->get_tmp_index()<<"];\n";
                         break;
                     }
                 }
@@ -179,11 +205,17 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     f<<"\n\t\t}\n\t}\n};\n\n";
     f<<"extern \"C\" " + class_name_ +"* create()\n{\n\treturn new " + class_name_ + "();\n}\n\n";
     f<<"extern \"C\" void destroy(" + class_name_ +"* p)\n{\n\tdelete p;\n}\n\n";
+
+    unsigned int count = 0;
+    for (int i=0;i<nb_v;i++)    if(used_[i])    count++;
+
+//    std::cout<<"ComputedTreeList::prepare_file step 5   count = "<< count <<"  nb_v = "<< nb_v<<std::endl;
     f.close();
     // Create the library
     command = "g++ -O3 -ggdb -shared " + filename + " -I" + std::string(INCLUDE_DIR) + " -o lib"+class_name_+".so -fPIC";
 //    std::cout<<"Compilation command is : "<< command<<std::endl;
     dummy = system ( command.c_str() );
+//    std::cout<<"ComputedTreeList::prepare_file step 6"<<std::endl;
 }
 
 void ComputedTreeList::show_all()const
@@ -207,15 +239,17 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
         update_var_file(f,v->in2_,val);
     }
 
-    f<<val<<"tmp["<< v->get_tmp_index()<<"] = ";
+    f<<val<<"t["<< v->get_tmp_index()<<"] = ";
+    used_[v->get_tmp_index()] = true;
     switch(v->type_)
     {
+        case(NLDOUBLE): f<<v->value_<<";";break;
         case(NLCOS):    f<<"cos("<<v->in1_->get_tmp_name()<<");"; break;
         case(NLSIN):    f<<"sin("<<v->in1_->get_tmp_name()<<");"; break;
         case(NLOPP):    f<<"- "<<v->in1_->get_tmp_name()<<";"; break;
-        case(NLADD):    f<<v->in1_->get_tmp_name()<<"+"<< v->in2_->get_tmp_name()<<";"; break;
-        case(NLMUL):    f<<v->in1_->get_tmp_name()<<"*"<< v->in2_->get_tmp_name()<<";"; break;
-        case(NLSUB):    f<<v->in1_->get_tmp_name()<<"-"<< v->in2_->get_tmp_name()<<";"; break;
+        case(NLADD):    f<<v->in1_->get_tmp_name()<<" + "<< v->in2_->get_tmp_name()<<";"; break;
+        case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
+        case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
         default:    break;
     }
     f<<"\n";

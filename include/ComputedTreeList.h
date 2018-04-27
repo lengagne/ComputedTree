@@ -40,9 +40,16 @@ class ComputedTreeList
                         unsigned int index,
                         unsigned int out=0);
 //
+        void clear_all();
+
         unsigned int get_nb_inputs() const
         {
             return inputs_.size();
+        }
+
+        unsigned int get_nb_tmp()const
+        {
+            return tmp_var_.size();
         }
 
 //        std::vector<Monomial*> get_monomial_update_list( const ComputedTree* in) const;
@@ -50,6 +57,8 @@ class ComputedTreeList
         AbstractGeneratedCode* get_recompile_code(const std::string & libname="");
 
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");
+
+        void reset();
 
         void update_var_file(std::ofstream& f , ComputedTree* v, const std::string& val ="");
 
@@ -65,6 +74,8 @@ class ComputedTreeList
     std::vector<unsigned int > output_num_;
     std::vector<unsigned int > output_index_;
 //    double updated_value_;
+
+    std::vector<bool> used_;
 //
     std::string class_name_;
 //
