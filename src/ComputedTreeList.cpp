@@ -18,6 +18,7 @@ ComputedTree* ComputedTreeList::add_input(const ComputedTree& in)
 ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 {
     ComputedTree *t = new ComputedTree(in);
+    std::cout<<"add intermediate for "<< in <<std::endl;
 //    for (int i=0;i<tmp_var_.size();i++)
 //        if(tmp_var_[i] == t)
 //            std::cout<<"found equality"<<std::endl;

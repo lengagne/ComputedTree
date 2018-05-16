@@ -6,9 +6,9 @@
 ComputedTreeList chief_;
 
 ComputedTree::ComputedTree():   input_index_(-1),name_(""),value_(0),
-                                in1_(0),in2_(0),type_(NLNONE),me_(0)
+                                in1_(0),in2_(0),type_(NLNULL),me_(0)
 {
-    me_ = chief_.add_intermediate(*this);
+
 }
 
 ComputedTree::~ComputedTree()
@@ -24,10 +24,18 @@ ComputedTree::ComputedTree(const ComputedTree& other):input_index_(other.input_i
 }
 
 ComputedTree::ComputedTree(const double& input):input_index_(-1),value_(input),
-                                                in1_(0),in2_(0),type_(NLDOUBLE)
+                                                in1_(0),in2_(0)
 {
-    me_ = chief_.add_intermediate(*this);
-    name_ = to_string_with_precision(input);
+    if (input !=0)
+    {
+        me_ = chief_.add_intermediate(*this);
+        name_ = to_string_with_precision(input);
+        type_ = NLDOUBLE;
+    }else
+    {
+        type_ = NLNULL;
+    }
+
 }
 
 void ComputedTree::TreeList_clear_all()
@@ -87,7 +95,7 @@ AbstractGeneratedCode* ComputedTree::get_recompile_code(const std::string & libn
 
 bool ComputedTree::is_not_null()const
 {
-    if (type_ == NLDOUBLE && value_ == 0)   return false;
+    if(type_ == NLNULL) return false;
     return true;
 }
 
@@ -138,9 +146,9 @@ void ComputedTree::set_as_output(   unsigned int index,
 
 void ComputedTree::operator+= (const ComputedTree& in)
 {
-    if(type_ == NLNONE)
+    if(type_ == NLNULL)
         *this = in;
-    else if(in.type_ == NLNONE)
+    else if(in.type_ == NLNULL)
     {
 
     }else
@@ -151,9 +159,9 @@ void ComputedTree::operator+= (const ComputedTree& in)
 
 void ComputedTree::operator-= (const ComputedTree& in)
 {
-    if(type_ == NLNONE)
+    if(type_ == NLNULL)
         *this = -in;
-    else if(in.type_ == NLNONE)
+    else if(in.type_ == NLNULL)
     {
 
     }else
@@ -164,9 +172,9 @@ void ComputedTree::operator-= (const ComputedTree& in)
 
 void ComputedTree::operator*= (const ComputedTree& in)
 {
-    if(type_ == NLNONE)
+    if(type_ == NLNULL)
         *this = 0;
-    else if(in.type_ == NLNONE)
+    else if(in.type_ == NLNULL)
     {
         *this = 0;
     }else
@@ -187,9 +195,9 @@ ComputedTree ComputedTree::operator- () const
 
 ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 {
-    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+    if(type_ == NLNULL)
         return in;
-    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+    if(in.type_ == NLNULL)
         return *this;
 
     if(in.me_->type_ == NLOPP)
@@ -213,10 +221,10 @@ ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 //
 ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 {
-    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+    if(me_->type_ == NLNULL)
         return -in;
 
-    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+    if(in.me_->type_ == NLNULL)
         return *this;
 
     if(in.me_->type_ == NLOPP)
@@ -237,6 +245,9 @@ ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 
 ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 {
+    if(type_ == NLNULL || in.type_ == NLNULL)
+        return ComputedTree();
+
     if(me_->type_ == NLDOUBLE && me_->value_ == 1)
         return in;
 
@@ -311,8 +322,8 @@ std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
         case(NLDOUBLE):
             os<<obj.value_;
             break;
-        case(NLNONE):
-            os<<"NLNONE";
+        case(NLNULL):
+            os<<"NLNULL";
             break;
         default: os<<"TYPE "<< obj.type_ <<" undefined";
     }

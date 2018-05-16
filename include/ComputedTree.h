@@ -7,7 +7,7 @@
 
 class ComputedTree;
 
-typedef enum {NLNONE, NLDOUBLE, NLIN, NLCOS, NLSIN, NLOPP, NLADD, NLSUB, NLMUL }NLType;
+typedef enum {NLNULL, NLDOUBLE, NLIN, NLCOS, NLSIN, NLOPP, NLADD, NLSUB, NLMUL }NLType;
 
 class ComputedTree
 {
