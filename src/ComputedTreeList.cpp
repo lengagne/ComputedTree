@@ -17,11 +17,21 @@ ComputedTree* ComputedTreeList::add_input(const ComputedTree& in)
 
 ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 {
+    if (in.type_ == NLIN)
+    {
+        std::vector<ComputedTree* >::iterator it = std::find(inputs_.begin(), inputs_.end(), &in);
+        if(it == inputs_.end())
+        {
+            std::cerr<<"ERROR cannot recover input "<< in<<std::endl;
+            exit(0);
+        }
+        else
+        {
+            return *it;
+        }
+    }
+
     ComputedTree *t = new ComputedTree(in);
-    std::cout<<"add intermediate for "<< in <<std::endl;
-//    for (int i=0;i<tmp_var_.size();i++)
-//        if(tmp_var_[i] == t)
-//            std::cout<<"found equality"<<std::endl;
     tmp_var_.push_back(t);
     t->me_ = t;
     return t;
@@ -251,6 +261,7 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
     used_[v->get_tmp_index()] = true;
     switch(v->type_)
     {
+
         case(NLDOUBLE): f<<v->value_<<";";break;
         case(NLCOS):    f<<"cos("<<v->in1_->get_tmp_name()<<");"; break;
         case(NLSIN):    f<<"sin("<<v->in1_->get_tmp_name()<<");"; break;
@@ -258,7 +269,9 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
         case(NLADD):    f<<v->in1_->get_tmp_name()<<" + "<< v->in2_->get_tmp_name()<<";"; break;
         case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
         case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
-        default:    break;
+        default:
+        case(NLIN)   :   std::cerr<<"Error try to create a NLIN variable !! " <<std::endl; exit(2);break;
+        case(NLNULL)   :   std::cerr<<"Error try to create a NLNULL variable !! " <<std::endl; exit(2);break;
     }
     f<<"\n";
 

@@ -28,9 +28,10 @@ ComputedTree::ComputedTree(const double& input):input_index_(-1),value_(input),
 {
     if (input !=0)
     {
-        me_ = chief_.add_intermediate(*this);
         name_ = to_string_with_precision(input);
         type_ = NLDOUBLE;
+        me_ = chief_.add_intermediate(*this);
+
     }else
     {
         type_ = NLNULL;
@@ -221,10 +222,10 @@ ComputedTree ComputedTree::operator+ (const ComputedTree& in) const
 //
 ComputedTree ComputedTree::operator- (const ComputedTree& in) const
 {
-    if(me_->type_ == NLNULL)
+    if(type_ == NLNULL)
         return -in;
 
-    if(in.me_->type_ == NLNULL)
+    if(in.type_ == NLNULL)
         return *this;
 
     if(in.me_->type_ == NLOPP)
@@ -297,7 +298,7 @@ ComputedTree sin(ComputedTree& in)
 
 std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
-   switch(obj.type_)
+    switch(obj.type_)
     {
         case(NLMUL):
             os<<"("<<*(obj.in1_)<<"*"<<*(obj.in2_)<<")";
@@ -326,6 +327,7 @@ std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
             os<<"NLNULL";
             break;
         default: os<<"TYPE "<< obj.type_ <<" undefined";
+            exit(0);
     }
     return os;
 }
