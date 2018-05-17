@@ -17,6 +17,7 @@ ComputedTree* ComputedTreeList::add_input(const ComputedTree& in)
 
 ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 {
+//    std::cout<<" size = "<< tmp_var_.size()<<" in = "<< in <<std::endl;
     if (in.type_ == NLIN)
     {
         std::vector<ComputedTree* >::iterator it = std::find(inputs_.begin(), inputs_.end(), &in);

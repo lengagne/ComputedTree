@@ -276,7 +276,7 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
     return out;
 }
 
-ComputedTree cos(ComputedTree& in)
+ComputedTree cos(const ComputedTree& in)
 {
     ComputedTree out;
     out.in1_ = in.me_;
@@ -286,7 +286,7 @@ ComputedTree cos(ComputedTree& in)
     return out;
 }
 
-ComputedTree sin(ComputedTree& in)
+ComputedTree sin(const ComputedTree& in)
 {
     ComputedTree out;
     out.in1_ = in.me_;

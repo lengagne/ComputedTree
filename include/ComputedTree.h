@@ -123,8 +123,8 @@ class ComputedTree
         }
 
         friend std::ostream& operator<<(std::ostream& os, const ComputedTree& obj);
-        friend ComputedTree cos(ComputedTree& in);
-        friend ComputedTree sin(ComputedTree& in);
+        friend ComputedTree cos(const ComputedTree& in);
+        friend ComputedTree sin(const ComputedTree& in);
         friend class ComputedTreeList;
     private:
         int input_index_ = -1;
