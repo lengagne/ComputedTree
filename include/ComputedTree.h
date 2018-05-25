@@ -42,6 +42,11 @@ class ComputedTree
 
         AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
 
+        double get_double_from_vector(const std::vector<double>& v)
+        {
+            return v[input_index_];
+        }
+
 //        bool is_double() const;
 //
         void prepare_file( const std::string & filename="ComputedTreeGenerated.cpp");

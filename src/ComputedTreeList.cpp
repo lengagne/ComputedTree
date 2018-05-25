@@ -271,8 +271,8 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
         case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
         case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
         default:
-        case(NLIN)   :   std::cerr<<"Error try to create a NLIN variable !! " <<std::endl; exit(2);break;
-        case(NLNULL)   :   std::cerr<<"Error try to create a NLNULL variable !! " <<std::endl; exit(2);break;
+        case(NLIN)   :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLIN variable !! " <<std::endl; exit(2);break;
+        case(NLNULL) :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLNULL variable !! " <<std::endl; exit(2);break;
     }
     f<<"\n";
 
