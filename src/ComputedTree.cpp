@@ -80,7 +80,7 @@ double ComputedTree::eval()
 
 std::string ComputedTree::ComputedTree::get_tmp_name() const
 {
-    if(type_==NLDOUBLE) return to_string_with_precision(value_);
+    if(type_== NLDOUBLE) return to_string_with_precision(value_);
     return "t[" + std::to_string(tmp_index_) + "]";
 }
 
@@ -186,6 +186,8 @@ void ComputedTree::operator*= (const ComputedTree& in)
 
 ComputedTree ComputedTree::operator- () const
 {
+    if(type_ == NLNULL)
+        return 0;
     ComputedTree out;
     out.type_ = NLOPP;
     out.in1_ = me_;
@@ -278,6 +280,8 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 
 ComputedTree cos(const ComputedTree& in)
 {
+    if (in.type_ == NLNULL)
+        return 1.0;
     ComputedTree out;
     out.in1_ = in.me_;
     out.type_ = NLCOS;
@@ -288,6 +292,8 @@ ComputedTree cos(const ComputedTree& in)
 
 ComputedTree sin(const ComputedTree& in)
 {
+    if (in.type_ == NLNULL)
+        return 0.0;
     ComputedTree out;
     out.in1_ = in.me_;
     out.type_ = NLSIN;
