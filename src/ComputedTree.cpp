@@ -230,7 +230,7 @@ ComputedTree ComputedTree::operator- (const ComputedTree& in) const
     if(in.type_ == NLNULL)
         return *this;
 
-    if(in.me_->type_ == NLOPP)
+    if(in.me_ && in.me_->type_ == NLOPP)
         return *this + *(in.me_->in1_);
 
 
