@@ -80,10 +80,7 @@ class ComputedTree
 //        void operator= (const double & d);
 ////        void operator= (const ComputedTree& in);
 //
-        void operator*= (const double & d)
-        {
-            *this = *this * d;
-        }
+        void operator*= (const double & d);
 
         void operator+= (const ComputedTree& in);
         void operator-= (const ComputedTree& in);

@@ -20,10 +20,11 @@ ComputedTree* ComputedTreeList::add_intermediate(const ComputedTree& in)
 //    std::cout<<" size = "<< tmp_var_.size()<<" in = "<< in <<std::endl;
     if (in.type_ == NLIN)
     {
-        std::vector<ComputedTree* >::iterator it = std::find(inputs_.begin(), inputs_.end(), &in);
+        std::vector<ComputedTree* >::iterator it = std::find(inputs_.begin(), inputs_.end(), in.me_);
         if(it == inputs_.end())
         {
-            std::cerr<<"ERROR cannot recover input "<< in<<std::endl;
+            std::cerr<<"ERROR in file: "<< __FILE__<<" at line "<< __LINE__<<std::endl;
+            std::cerr<<"cannot recover input "<< in <<" @:"<< &in <<std::endl;
             exit(0);
         }
         else

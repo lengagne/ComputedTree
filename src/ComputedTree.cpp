@@ -154,7 +154,12 @@ void ComputedTree::operator+= (const ComputedTree& in)
 
     }else
     {
-        *this = *this + in;
+//        *this = *this + in;
+//        type_ = NLADD;
+        ComputedTree out;
+        out = *this + in;
+        *this = out;
+        me_ = chief_.add_intermediate(out);
     }
 }
 
@@ -167,7 +172,10 @@ void ComputedTree::operator-= (const ComputedTree& in)
 
     }else
     {
-        *this = *this - in;
+        ComputedTree out;
+        out = *this - in;
+        *this = out;
+        me_ = chief_.add_intermediate(out);
     }
 }
 
@@ -180,8 +188,30 @@ void ComputedTree::operator*= (const ComputedTree& in)
         *this = 0;
     }else
     {
-        *this = *this * in;
+        ComputedTree out;
+        out = *this * in;
+        *this = out;
+        me_ = chief_.add_intermediate(out);
     }
+}
+
+void ComputedTree::operator*= (const double & d)
+{
+    if (d==0)
+    {
+        ComputedTree out = 0.;
+        *this = out;
+    }else if (d==1)
+    {
+
+    }else
+    {
+        ComputedTree out;
+        out = *this * d;
+        *this = out;
+        me_ = chief_.add_intermediate(out);
+    }
+
 }
 
 ComputedTree ComputedTree::operator- () const
@@ -263,12 +293,17 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
     if(in.me_->type_ == NLDOUBLE && in.me_->value_ == -1)
         return -*this;
 
-    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+//    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+//        return 0;
+//
+//    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+//        return 0;
+
+    if(me_->type_ == NLNULL)
         return 0;
 
-    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+    if(in.me_->type_ == NLNULL)
         return 0;
-
     ComputedTree out;
     out.in1_ = me_;
     out.in2_ = in.me_;
@@ -281,7 +316,10 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
 ComputedTree cos(const ComputedTree& in)
 {
     if (in.type_ == NLNULL)
+    {
+        std::cout<<"ComputedTree cos of null"<<std::endl;
         return 1.0;
+    }
     ComputedTree out;
     out.in1_ = in.me_;
     out.type_ = NLCOS;
@@ -293,7 +331,10 @@ ComputedTree cos(const ComputedTree& in)
 ComputedTree sin(const ComputedTree& in)
 {
     if (in.type_ == NLNULL)
+    {
+        std::cout<<"ComputedTree sin of null"<<std::endl;
         return 0.0;
+    }
     ComputedTree out;
     out.in1_ = in.me_;
     out.type_ = NLSIN;
@@ -316,7 +357,8 @@ std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
             os<<"("<<*(obj.in1_)<<"-"<<*(obj.in2_)<<")";
             break;
         case(NLOPP):
-            os<<"-"<<*(obj.in1_);
+            os<<"-("<<*(obj.in1_)<<")";
+            break;
         case(NLCOS):
             os<<"cos("<<*(obj.in1_)<<")";
             break;
