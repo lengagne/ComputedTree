@@ -34,7 +34,7 @@ class ComputedTree
 
         std::string get_tmp_name() const;
 
-        unsigned int get_nb_tmp()const;
+        static unsigned int get_nb_tmp();
 
 //
 //        // get the value : assume it is double
@@ -74,7 +74,7 @@ class ComputedTree
             name_ = n;
         }
 
-        void show_all()const;
+        static void show_all();
 
 
 //        void operator= (const double & d);

@@ -84,7 +84,7 @@ std::string ComputedTree::ComputedTree::get_tmp_name() const
     return "t[" + std::to_string(tmp_index_) + "]";
 }
 
-unsigned int ComputedTree::get_nb_tmp()const
+unsigned int ComputedTree::get_nb_tmp()
 {
     return chief_.get_nb_tmp();
 }
@@ -132,7 +132,7 @@ void ComputedTree::set_as_input(const std::string& name)
     if(me_) me_->name_ = name;
 }
 
-void ComputedTree::show_all()const
+void ComputedTree::show_all()
 {
     chief_.show_all();
 }
@@ -218,6 +218,9 @@ ComputedTree ComputedTree::operator- () const
 {
     if(type_ == NLNULL)
         return 0;
+    if(type_ == NLOPP)
+        return (*in1_);
+
     ComputedTree out;
     out.type_ = NLOPP;
     out.in1_ = me_;
@@ -293,11 +296,11 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
     if(in.me_->type_ == NLDOUBLE && in.me_->value_ == -1)
         return -*this;
 
-//    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
-//        return 0;
-//
-//    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
-//        return 0;
+    if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+        return 0;
+
+    if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 0)
+        return 0;
 
     if(me_->type_ == NLNULL)
         return 0;
@@ -317,7 +320,7 @@ ComputedTree cos(const ComputedTree& in)
 {
     if (in.type_ == NLNULL)
     {
-        std::cout<<"ComputedTree cos of null"<<std::endl;
+//        std::cout<<"ComputedTree cos of null"<<std::endl;
         return 1.0;
     }
     ComputedTree out;
@@ -332,7 +335,7 @@ ComputedTree sin(const ComputedTree& in)
 {
     if (in.type_ == NLNULL)
     {
-        std::cout<<"ComputedTree sin of null"<<std::endl;
+//        std::cout<<"ComputedTree sin of null"<<std::endl;
         return 0.0;
     }
     ComputedTree out;
