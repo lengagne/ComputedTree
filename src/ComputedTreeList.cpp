@@ -259,22 +259,24 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
         update_var_file(f,v->in2_,val);
     }
 
-    f<<val<<"t["<< v->get_tmp_index()<<"] = ";
-    used_[v->get_tmp_index()] = true;
-    switch(v->type_)
+    if(v->type_ != NLIN)
     {
+        f<<val<<"t["<< v->get_tmp_index()<<"] = ";
+        used_[v->get_tmp_index()] = true;
+        switch(v->type_)
+        {
 
-        case(NLDOUBLE): f<<v->value_<<";";break;
-        case(NLCOS):    f<<"cos("<<v->in1_->get_tmp_name()<<");"; break;
-        case(NLSIN):    f<<"sin("<<v->in1_->get_tmp_name()<<");"; break;
-        case(NLOPP):    f<<"- "<<v->in1_->get_tmp_name()<<";"; break;
-        case(NLADD):    f<<v->in1_->get_tmp_name()<<" + "<< v->in2_->get_tmp_name()<<";"; break;
-        case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
-        case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
-        default:
-        case(NLIN)   :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLIN variable !! " <<std::endl; exit(2);break;
-        case(NLNULL) :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLNULL variable !! " <<std::endl; exit(2);break;
+            case(NLDOUBLE): f<<v->value_<<";";break;
+            case(NLCOS):    f<<"cos("<<v->in1_->get_tmp_name()<<");"; break;
+            case(NLSIN):    f<<"sin("<<v->in1_->get_tmp_name()<<");"; break;
+            case(NLOPP):    f<<"- "<<v->in1_->get_tmp_name()<<";"; break;
+            case(NLADD):    f<<v->in1_->get_tmp_name()<<" + "<< v->in2_->get_tmp_name()<<";"; break;
+            case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
+            case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
+            default:
+            case(NLIN)   :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLIN variable !! " <<std::endl; exit(2);break;
+            case(NLNULL) :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLNULL variable !! " <<std::endl; exit(2);break;
+        }
+        f<<"\n";
     }
-    f<<"\n";
-
 }
