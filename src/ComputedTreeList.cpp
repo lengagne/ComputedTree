@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <dlfcn.h>
+#include <unistd.h>
 
 ComputedTreeList::~ComputedTreeList()
 {
@@ -83,22 +84,29 @@ AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & 
     unsigned int count = 0;
     void* library;
     do{
+        count++;
         library =dlopen(lib.c_str(), RTLD_LAZY);
         if (!library) {
             std::cerr <<"Error1 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
-//            exit(0);
+            if(count>10)
+                exit(0);
+            sleep(1);
         }
     }while(!library);
     // load the symbols
 
+    count = 0;
     do{
-    creator_ = (create_code*) dlsym(library, "create");
-    destructor_ = (destroy_code*) dlsym(library, "destroy");
-    if (!creator_ || !destructor_)
-    {
-        std::cerr <<"Error2 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
-//        exit(0);
-    }
+        count++;
+        creator_ = (create_code*) dlsym(library, "create");
+        destructor_ = (destroy_code*) dlsym(library, "destroy");
+        if (!creator_ || !destructor_)
+        {
+            std::cerr <<"Error2 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load symbols of ("<< lib <<"), with the error : " << dlerror() << '\n';
+            if(count>10)
+                exit(0);
+            sleep(1);
+        }
     }while(!creator_ || ! destructor_);
 
     return creator_();
