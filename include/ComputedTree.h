@@ -86,6 +86,19 @@ class ComputedTree
         void operator-= (const ComputedTree& in);
         void operator*= (const ComputedTree& in);
 
+        bool operator == (const ComputedTree& in) const
+        {
+            if(type_ != in.type_)   return false;
+            if(in1_ != in.in1_) return false;
+            if(in2_ != in.in2_) return false;
+            return true;
+        }
+
+        bool operator != (const ComputedTree& in) const
+        {
+            return !(*this==in);
+        }
+
         ComputedTree operator- () const;
 
         inline ComputedTree operator* (const double & d) const
