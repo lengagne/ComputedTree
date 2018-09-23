@@ -42,7 +42,7 @@ class ComputedTree
 
         AbstractGeneratedCode* get_recompile_code(const std::string & libname ="")const;
 
-        double get_double_from_vector(const std::vector<double>& v)
+        Real get_double_from_vector(const std::vector<Real>& v)
         {
             return v[input_index_];
         }
@@ -57,7 +57,7 @@ class ComputedTree
                             unsigned int num_out=0,
                             const std::string& name="undefined");
 
-        void set_input_vector(double d, std::vector<double>& v)
+        void set_input_vector(Real d, std::vector<Real>& v)
         {
             v[input_index_] = d;
             value_ = d;
@@ -144,7 +144,7 @@ class ComputedTree
     private:
         int input_index_ = -1;
         std::string name_;
-        double value_;
+        Real value_;
         ComputedTree * in1_;
         ComputedTree * in2_;
         ComputedTree * me_;

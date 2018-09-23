@@ -161,12 +161,12 @@ void ComputedTreeList::prepare_file( const std::string & filename)
 
     f<<"\tunsigned int get_nb_in()const \n\t{\n\t\treturn "<< nb_in <<";\n\t}\n\n";
     f<<"\t // intermediate variables\n";
-    f<<"\tdouble t["<<nb_v<<"];\n";
+    f<<"\t"<<RealName<<" t["<<nb_v<<"];\n";
     used_.resize(nb_v);
     for (int i=0;i<nb_v;i++)    used_[i] = false;
 
     unsigned int cpt = 0;
-    f<<"\n\n\tvoid set_input(std::vector<double> & in)\n\t{\n";
+    f<<"\n\n\tvoid set_input(std::vector<"<< RealName<<"> & in)\n\t{\n";
     for (std::vector<ComputedTree*>::const_iterator it=inputs_.begin(); it!=inputs_.end(); it++)
     {
         const ComputedTree& tree = *(*it);
@@ -174,7 +174,7 @@ void ComputedTreeList::prepare_file( const std::string & filename)
     }
     f<<"\t}\n\n";
 //
-    f<<"\tdouble function(unsigned int index, unsigned int out=0)\n\t{\n\t\tswitch(out)\n\t\t{\n";
+    f<<"\t"<< RealName<<" function(unsigned int index, unsigned int out=0)\n\t{\n\t\tswitch(out)\n\t\t{\n";
     // find max output
     unsigned int nb_output = 0; // std::max_element(output_num_.begin(), output_num_.end()) + 1;
     for (std::vector<unsigned int>::const_iterator it=output_num_.begin(); it!=output_num_.end(); it++)
