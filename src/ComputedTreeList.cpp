@@ -89,12 +89,15 @@ AbstractGeneratedCode* ComputedTreeList::get_recompile_code(const std::string & 
         if (!library) {
             std::cerr <<"Error1 in "<<__FILE__<<" at line "<<__LINE__<< " : Cannot load library ("<< lib <<"), with the error : " << dlerror() << '\n';
             if(count>10)
+            {
+                std::cerr<<"Cannot load the library, stopping program"<<std::endl;
+                std::cerr<<"Sometimes the following line solve the issue : \n export LD_LIBRARY_PATH=."<<std::endl;
                 exit(0);
+            }
             sleep(1);
         }
     }while(!library);
     // load the symbols
-
     count = 0;
     do{
         count++;
@@ -280,6 +283,7 @@ void ComputedTreeList::update_var_file(std::ofstream& f , ComputedTree* v, const
             case(NLOPP):    f<<"- "<<v->in1_->get_tmp_name()<<";"; break;
             case(NLADD):    f<<v->in1_->get_tmp_name()<<" + "<< v->in2_->get_tmp_name()<<";"; break;
             case(NLMUL):    f<<v->in1_->get_tmp_name()<<" * "<< v->in2_->get_tmp_name()<<";"; break;
+            case(NLDIV):    f<<v->in1_->get_tmp_name()<<" / "<< v->in2_->get_tmp_name()<<";"; break;
             case(NLSUB):    f<<v->in1_->get_tmp_name()<<" - "<< v->in2_->get_tmp_name()<<";"; break;
             default:
             case(NLIN)   :   std::cerr<<"Error in "<<__FILE__<<" at line "<<__LINE__<< " : try to create a NLIN variable !! " <<std::endl; exit(2);break;

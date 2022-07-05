@@ -54,6 +54,8 @@ double ComputedTree::eval()
     updated_ = true;
     switch(type_)
     {
+        case(NLDIV):
+            value_ = in1_->eval() / in2_->eval();        
         case(NLMUL):
             value_ = in1_->eval() * in2_->eval();
             break;
@@ -316,6 +318,51 @@ ComputedTree ComputedTree::operator* (const ComputedTree& in) const
     return out;
 }
 
+
+ComputedTree ComputedTree::operator/ (const ComputedTree& in) const
+{
+//     if(in.me_->type_ == NLDOUBLE && in.me_->value_ == 1)
+//     {
+//         std::cout<<"return 2 "<<std::endl;
+//         return *this;
+//     }
+// 
+//     if(in.me_->type_ == NLDOUBLE && in.me_->value_ == -1)
+//     {
+//         std::cout<<"return 3 "<<std::endl;
+//         return -*this;
+//     }
+// 
+//     if(me_->type_ == NLDOUBLE && me_->value_ == 0)
+//     {
+//         std::cout<<"return 4 "<<std::endl;
+//         return 0;
+//     }
+// 
+//     if(me_->type_ == NLNULL)
+//     {
+//         std::cout<<"return 5 "<<std::endl;
+//         return 0;
+//     }
+// 
+//     std::cout<<"on fait un truc "<<std::endl;
+//     std::cout<<"Avant *this = "<< *this <<std::endl;
+//     std::cout<<"Avant in = "<< in <<std::endl;
+    
+    ComputedTree out;
+    out.in1_ = me_;
+    out.in2_ = in.me_;
+    out.type_ = NLDIV;
+    out.name_ = get_name() + "/" +in.get_name();
+    out.me_ = chief_.add_intermediate(out);
+    
+    
+    
+//     std::cout<<"Apres division out = "<< out <<std::endl;
+    return out;
+}
+
+
 ComputedTree cos(const ComputedTree& in)
 {
     if (in.type_ == NLNULL)
@@ -350,6 +397,9 @@ std::ostream& operator<<(std::ostream& os, const ComputedTree& obj)
 {
     switch(obj.type_)
     {
+        case(NLDIV):
+            os<<"("<<*(obj.in1_)<<"/"<<*(obj.in2_)<<")";
+            break;        
         case(NLMUL):
             os<<"("<<*(obj.in1_)<<"*"<<*(obj.in2_)<<")";
             break;

@@ -7,7 +7,7 @@
 
 class ComputedTree;
 
-typedef enum {NLNULL, NLDOUBLE, NLIN, NLCOS, NLSIN, NLOPP, NLADD, NLSUB, NLMUL }NLType;
+typedef enum {NLNULL, NLDOUBLE, NLIN, NLCOS, NLSIN, NLOPP, NLADD, NLSUB, NLMUL, NLDIV }NLType;
 
 class ComputedTree
 {
@@ -105,10 +105,22 @@ class ComputedTree
         {
             return (ComputedTree(d)) *  (*this);
         }
+        
+        inline ComputedTree operator+ (const double & d) const
+        {
+            return *this + ComputedTree(d);
+        }
+        
+        inline ComputedTree operator- (const double & d) const
+        {
+            return *this - ComputedTree(d);
+        }        
+        
 //        ComputedTree operator/ (const double & d) const;
         ComputedTree operator+ (const ComputedTree& in) const;
         ComputedTree operator- (const ComputedTree& in) const;
         ComputedTree operator* (const ComputedTree& in) const;
+        ComputedTree operator/ (const ComputedTree& in) const;
 
         bool is_not_null()const;
 

@@ -57,22 +57,6 @@ int main()
     toto.set_as_output(0,5,"toto");
 
     j.prepare_file();
-//
-//    AbstractGeneratedCode* recompiled_code = j.get_recompile_code();
-//    std::cout<<"recompiled_code = "<< recompiled_code <<std::endl;
-//
-//    std::vector<double> in(2);
-//    in[0] = 1;
-//    in[1] = 1.5;
-//
-//    std::cout<<"nb_in = "<< recompiled_code->get_nb_in();
-//
-//    recompiled_code->set_input(in);
-//    std::cout<<"c : reel = "<< in[0]*2.12332223365000005<<" vs "<< recompiled_code->function(0,0)<<std::endl;
-//    std::cout<<"toto : reel = "<< in[0]*in[1] - cos(in[0])*sin(in[0])<<" vs "<< recompiled_code->function(0,5)<<std::endl;
-//
-//    std::cout<<"end of the program"<<std::endl;
-
     a.show_all();
 	return 0;
 }
